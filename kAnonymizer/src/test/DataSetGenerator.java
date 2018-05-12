@@ -29,7 +29,7 @@ public class DataSetGenerator {
 			})));
 			add( new ArrayList<Generalizer>(Arrays.asList(new CategoricGeneralizer[] { 
 					new CategoricGeneralizer("6", "Married"), new CategoricGeneralizer("7", "Widowed"),
-					new CategoricGeneralizer("8", "Divorced"), new CategoricGeneralizer("7", "Never Married")
+					new CategoricGeneralizer("8", "Divorced"), new CategoricGeneralizer("9", "Never Married")
 			})));
 		}};
 		ArrayList<ArrayList<String>> dataset = generate(200, generalizer);

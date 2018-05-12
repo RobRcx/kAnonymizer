@@ -50,6 +50,7 @@ public class DataSet {
 		for (int i = 0; i < generalizer.size(); i++) {
 			this.generalizer.add(new LinkedHashMap<String, Generalizer>());
 			for (Generalizer g : generalizer.get(i)) {
+				assert(!this.generalizer.get(i).containsKey(g.id));
 				this.generalizer.get(i).put(g.id, g);
 			}
 		}
@@ -81,7 +82,7 @@ public class DataSet {
 	}
 
 	public void sort() {
-		activeGeneralizer = generalizer;
+		activeGeneralizer = (ArrayList<LinkedHashMap<String, Generalizer>>) generalizer.clone();
 		System.out.println("Generalizers : " + generalizer);
 		System.out.println("Active generalizers : " + activeGeneralizer);
 		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));
@@ -102,36 +103,34 @@ public class DataSet {
 		public int compare(Tuple t0, Tuple t1) {
 			for (int i = 0; i < t0.data.size(); i++) {
 				//System.out.println("Processing tuple " + i + "...");
-				boolean f0, f1;
-				f0 = f1 = false;
 				int c0, c1;
-				c0 = c1 = 0;
+				c0 = c1 = -1;
 				for (int j = 0; j < activeGeneralizer.get(i).size(); j++) {
 					//System.out.println("Processing generalizer " + j);
 					
-					Iterator<Entry<String, Generalizer>> activeGeneralizerIt = 
-							activeGeneralizer.get(i).entrySet().iterator();
+					c0 = c1 = -1;
 					
-					ArrayList<Entry<String, Generalizer>> generalizerEntry = new ArrayList<>();
-					Iterator<Entry<String, Generalizer>> it = generalizer.get(i).entrySet().iterator();
-					while (it.hasNext()) {
-						Entry<String, Generalizer> entry = it.next();
-						generalizerEntry.add(entry);
-					}
-					ListIterator<Entry<String, Generalizer>> generalizerIt = generalizerEntry.listIterator();
+					ListIterator<Entry<String, Generalizer>> activeGeneralizerIt = 
+							this.getListIteratorFrom(activeGeneralizer.get(i).entrySet().iterator());
+					
+					ListIterator<Entry<String, Generalizer>> generalizerIt = 
+							this.getListIteratorFrom(generalizer.get(i).entrySet().iterator());
 					
 					int count = 0;
+					
 					while (activeGeneralizerIt.hasNext()) {
 						Entry<String, Generalizer> entry = activeGeneralizerIt.next();
 						Entry<String, Generalizer> nextActiveEntry = null;
-						if (activeGeneralizerIt.hasNext())
+						if (activeGeneralizerIt.hasNext()) {
 							nextActiveEntry = activeGeneralizerIt.next();
+							activeGeneralizerIt.previous();
+						}
 						
 						//System.out.println("Active generalizer : " + entry.getKey());
 						//if (nextActiveEntry != null)
 						//	System.out.println("Next active generalizer : " + nextActiveEntry.getKey());
 						
-						while (!f0 && !f1 && generalizerIt.hasNext()) {
+						while ((c0 == -1 || c1 == -1) && generalizerIt.hasNext()) {
 							entry = generalizerIt.next();
 							if (nextActiveEntry != null && !entry.getKey().equals(nextActiveEntry.getKey())) {
 								generalizerIt.previous();
@@ -139,24 +138,20 @@ public class DataSet {
 							}
 							
 							try {
-								if (!f0) {
-									f0 = entry.getValue().isWithin(t0.data.get(i));
-									if (f0)
-										c0 = count;
+								if (entry.getValue().contains(t0.data.get(i))) {
+									c0 = count;
 								}
-								if (!f1) {
-									f1 = entry.getValue().isWithin(t1.data.get(i));
-									if (f1)
-										c1 = count;
+								if (entry.getValue().contains(t1.data.get(i))) {
+									c1 = count;
 								}
 							} catch (Exception ex) {
 								System.out.println("Error comparing tuples.");
 								return 1;
 							}
-								
+							count++;	
 						}
-						count++;
-						if (f0 && f1)
+						
+						if (c0 != -1 && c1 != -1)
 							break;
 					}
 				}
@@ -173,6 +168,14 @@ public class DataSet {
 			System.out.println("The tuples " + t0.toString() + " and " + t1.toString() + " are equal");
 			return 0;
 		}
-	
+		
+		private <T, V>ListIterator<Entry<T, V>> getListIteratorFrom(Iterator<Entry<T, V>> it) {
+			ArrayList<Entry<T, V>> array = new ArrayList<>();
+			while (it.hasNext()) {
+				Entry<T, V> entry = it.next();
+				array.add(entry);
+			}
+			return array.listIterator();
+		}
 	}
 }
