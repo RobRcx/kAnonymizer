@@ -8,16 +8,17 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 import kAnonymizer.CategoricGeneralizer;
-import kAnonymizer.DataSet;
-import kAnonymizer.DataSet.ArrayListStringRef;
+import kAnonymizer.Dataset;
+import kAnonymizer.Dataset.ArrayListStringRef;
 import kAnonymizer.NumericGeneralizer;
 import kAnonymizer.Generalizer;
 import kAnonymizer.Tuple;
 
 
 
-public class DataSetGenerator {
+public class DatasetGenerator {
 	
+	// TODO: Implement main in KAnonymizer test JUnit module instead
 	public static void main(String args[]) {
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
 			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 
@@ -32,28 +33,17 @@ public class DataSetGenerator {
 					new CategoricGeneralizer("8", "Divorced"), new CategoricGeneralizer("9", "Never Married")
 			})));
 		}};
-		ArrayList<ArrayList<String>> dataset = generate(200, generalizer);
+		ArrayList<ArrayList<String>> data = generate(200, generalizer);
 		
-		for (ArrayList<String> t : dataset)
+		for (ArrayList<String> t : data)
 			System.out.println(t);
 		
-		ArrayListStringRef supplier = () -> dataset;
-		DataSet ds = new DataSet(supplier, generalizer);
-		ds.sort();
+		Dataset dataset = new Dataset(data, generalizer);
+		dataset.sort();
 		
-		
-		ArrayList<Tuple> tupleDataset = ds.data;
-		for (Tuple t : tupleDataset) {
+		ArrayList<Tuple> tupleDataset = dataset.data;
+		for (Tuple t : tupleDataset)
 			System.out.println(t.data);
-		}
-		
-		// Check equivalence classes consistency
-		/*HashMap<String, Integer> map = new HashMap<>();
-		for (Tuple t : tupleDataset) {
-			
-		}*/
-		
-		
 	}
 	
 	public static ArrayList<ArrayList<String>> generate(int tupleQuantity, 

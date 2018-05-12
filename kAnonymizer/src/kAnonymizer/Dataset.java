@@ -11,16 +11,16 @@ import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
-public class DataSet {
+public class Dataset {
 	public ArrayList<Tuple> data;
 	public ArrayList<LinkedHashMap<String, Generalizer>> generalizer;
 	public ArrayList<LinkedHashMap<String, Generalizer>> activeGeneralizer;
 
-	public DataSet(ArrayList<ArrayList<String>> data,
-			ArrayList<LinkedHashMap<String, Generalizer>> generalizer) {
+	public interface ArrayListStringRef extends Supplier<ArrayList<ArrayList<String>>> {}
+	public Dataset(ArrayListStringRef data, ArrayList<LinkedHashMap<String, Generalizer>> generalizer) {
 		
 		this.data = new ArrayList<Tuple>();
-		for (ArrayList<String> tuple : data) {
+		for (ArrayList<String> tuple : data.get()) {
 			this.data.add(new Tuple(tuple));
 		}
 		
@@ -38,11 +38,12 @@ public class DataSet {
 		}
 	}
 	
-	public interface ArrayListStringRef extends Supplier<ArrayList<ArrayList<String>>> {}
-	public DataSet(ArrayListStringRef data, ArrayList<ArrayList<Generalizer>> generalizer) {
+	
+	public Dataset(ArrayList<ArrayList<String>> data, 
+			ArrayList<ArrayList<Generalizer>> generalizer) {
 		
 		this.data = new ArrayList<Tuple>();
-		for (ArrayList<String> tuple : data.get()) {
+		for (ArrayList<String> tuple : data) {
 			this.data.add(new Tuple(tuple));
 		}
 		
@@ -82,7 +83,7 @@ public class DataSet {
 	}
 
 	public void sort() {
-		activeGeneralizer = (ArrayList<LinkedHashMap<String, Generalizer>>) generalizer.clone();
+		//activeGeneralizer = (ArrayList<LinkedHashMap<String, Generalizer>>) generalizer.clone();
 		System.out.println("Generalizers : " + generalizer);
 		System.out.println("Active generalizers : " + activeGeneralizer);
 		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));

@@ -33,27 +33,32 @@ public class Main {
 		
 		// TODO: read dataset into generic ArrayLists, and then 
 		// parse values type in KAnonymizer.java
-		ArrayList<ArrayList<String>> dataset = readDataset(args[1]);
-		ArrayList<Type> attributeType = new ArrayList<Type>(
-				Arrays.asList(new Type[] {Type.NUMERIC, Type.STRING, Type.CATEGORICAL}));
+		String path = args[1];
+		ArrayList<ArrayList<String>> dataset = readDataset(path);
 		
 		// TODO: read generalizations from file
-		String[] ageGeneralizers = new String[] {"10 <= 19", "20 <= 39", "40 <= 49"};
-		String[] genderGeneralizers = new String[] {"M", "F"};
-		String[] statusGeneralizers = new String[] {"Married", "Widowed", "Divorced", "Never Married"};
-		ArrayList<ArrayList<String>> generalizer = new ArrayList<ArrayList<String>>() {{
-			add(new ArrayList<String>(Arrays.asList(ageGeneralizers)));
-			add(new ArrayList<String>(Arrays.asList(genderGeneralizers)));
-			add(new ArrayList<String>(Arrays.asList(statusGeneralizers)));
+		
+		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
+			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 
+					new NumericGeneralizer("1", 10, 29), new NumericGeneralizer("2", 30, 39),
+					new NumericGeneralizer("3", 40, 49)
+			})));
+			add( new ArrayList<Generalizer>(Arrays.asList(new CategoricGeneralizer[] { 
+					new CategoricGeneralizer("4", "M"), new CategoricGeneralizer("5", "F")
+			})));
+			add( new ArrayList<Generalizer>(Arrays.asList(new CategoricGeneralizer[] { 
+					new CategoricGeneralizer("6", "Married"), new CategoricGeneralizer("7", "Widowed"),
+					new CategoricGeneralizer("8", "Divorced"), new CategoricGeneralizer("9", "Never Married")
+			})));
 		}};
 		
-		
-		KAnonymizer kAnonymizer = new KAnonymizer(k, dataset, attributeType, generalizer);
+		KAnonymizer kAnonymizer = new KAnonymizer(k, dataset, generalizer);
 		kAnonymizer.kOptimize();
 	}
 	
 	public static ArrayList<ArrayList<String>> readDataset(String datasetPath) {
 		ArrayList<ArrayList<String>> dataset = new ArrayList<ArrayList<String>>();
+		// TODO: read from file
 		return dataset;
 	}
 

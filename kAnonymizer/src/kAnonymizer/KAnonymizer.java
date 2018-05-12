@@ -15,28 +15,23 @@ import java.util.stream.IntStream;
 public class KAnonymizer {
 	
 	private int k;
-	private DataSet dataset;
-	// Maps each generalizer to the corresponding attribute id
-	private HashMap<String, Integer> generalizerAttributeMap; 
-	
+	private Dataset dataset;
+	private ArrayList<String> generalizerId;
 	
 	public KAnonymizer(int k, 
 					   ArrayList<ArrayList<String>> dataset,
-					   ArrayList<ArrayList<String>> generalizer) {
+					   ArrayList<ArrayList<Generalizer>> generalizer) {
 		this.k = k;
 		this.dataset = new Dataset(dataset, generalizer);
 		
-		// Sort the dataset to determine the equivalence classes
-		Collections.sort(this.dataset);
+		// Sort the dataset to determine the equivalence classes with the most general specialization
+		this.dataset.sort();
 		
-		
-		// Builds generalizer -> attribute map.
-		// It is needed in order to manage head and tail set of generalizers,
-		// and map them immediately to the corresponding attributes.
-		this.generalizerAttributeMap = new HashMap<String, Integer>();
+		// Stores generalizers id
+		this.generalizerId = new ArrayList<>();
 		for (int i = 0; i < generalizer.size(); i++) {
-			for (String g : generalizer.get(i)) {
-				this.generalizerAttributeMap.put(g, i);
+			for (int j = 0; j < generalizer.get(i).size(); j++) {
+				generalizerId.add(generalizer.get(i).get(j).getId());
 			}
 		}
 	}
@@ -49,14 +44,11 @@ public class KAnonymizer {
 	public int kOptimize() {
 		// Builds head set. No attribute generalization at the beginning
 		ArrayList<String> headSet = new ArrayList<>();
+		
 		// Builds tail set. All the attribute generalizations are contained there
 		ArrayList<String> tailSet = new ArrayList<>();
-		Iterator<Entry<String, Integer>> it = generalizerAttributeMap.entrySet().iterator();
-	    while (it.hasNext()) {
-	        Entry<String, Integer> pair = it.next();
-	        tailSet.add(pair.getKey());
-	        // System.out.println(pair.getKey() + " = " + pair.getValue());
-	        // it.remove(); // avoids a ConcurrentModificationException
+	    for (String str : generalizerId) {
+	    	tailSet.add(str);
 	    }
 		
 		return kOptimizeRecursive(headSet, tailSet, Integer.MAX_VALUE);
@@ -64,6 +56,7 @@ public class KAnonymizer {
 	
 	private int kOptimizeRecursive(ArrayList<String> headSet, 
 			ArrayList<String> tailSet, Integer bestCost) {
+		
 		return 0;
 	}
 	
