@@ -15,21 +15,20 @@ import java.util.stream.IntStream;
 public class KAnonymizer {
 	
 	private int k;
-	private ArrayList<Tuple> dataset;
+	private DataSet dataset;
 	// Maps each generalizer to the corresponding attribute id
 	private HashMap<String, Integer> generalizerAttributeMap; 
 	
 	
 	public KAnonymizer(int k, 
 					   ArrayList<ArrayList<String>> dataset,
-					   ArrayList<Type> attributeType,
 					   ArrayList<ArrayList<String>> generalizer) {
 		this.k = k;
+		this.dataset = new Dataset(dataset, generalizer);
 		
-		// Builds data structure for dataset.
-		for (ArrayList<String> tuple : dataset) {
-			this.dataset.add(new Tuple(tuple, attributeType));
-		}
+		// Sort the dataset to determine the equivalence classes
+		Collections.sort(this.dataset);
+		
 		
 		// Builds generalizer -> attribute map.
 		// It is needed in order to manage head and tail set of generalizers,
@@ -69,43 +68,18 @@ public class KAnonymizer {
 	}
 	
 	private int computeAnonymizationCost(ArrayList<String> headSet) {
-		// TODO Anonymize with the headSet
+		// Anonymize with the headSet
+		// => use implementation for category 1 equivalence classes
 		
-		// Sort the dataset to determine the equivalence classes
-		Collections.sort(dataset);
+		int cost = 0;
 		
-		int cost, inducedEquivalenceClassSize;
+		if (headSet.size() == 0)
+			return -1;
 		
-		cost = 0;
-		inducedEquivalenceClassSize = 1;
-		for (int i = 0; i < dataset.size() - 1; i++) {
-			// if consequent elements in the dataset are equal then the current
-			// equivalence class size must be incremented by one 
-			if (dataset.get(i).compareTo(dataset.get(i + 1)) == 0)
-				inducedEquivalenceClassSize += 1; 
-			else {
-				inducedEquivalenceClassSize = 1;
-				// Add the cost related to the equivalence class basing
-				// on the discernibility metric (cfr. Bayardo05)
-				if (inducedEquivalenceClassSize < k) {
-					// The induced equivalence classes of size less than k
-					// must be penalized as much as the entired dataset
-					// dimension.
-					cost += inducedEquivalenceClassSize * dataset.size();
-					// TODO: remove suppressed tuples from the dataset?
-				}
-				else {
-					cost += inducedEquivalenceClassSize * inducedEquivalenceClassSize;
-				}
-			}
-		}
+		String newGeneralizer = headSet.get(headSet.size() - 1);
+		
+		
 		
 		return cost;
 	}
-	
-	/*
-	private ArrayList<Integer> pruneUselessValues(ArrayList<Integer> headSet,
-			ArrayList<Integer> tailSet) {
-		return null;
-	}*/
 }
