@@ -69,8 +69,7 @@ public class Dataset {
 		}
 	}
 	
-	public void addActiveGeneralizers(ArrayList<LinkedHashMap<String, Generalizer>> 
-		newGeneralizer) {
+	public void addActiveGeneralizers(ArrayList<LinkedHashMap<String, Generalizer>> newGeneralizer) {
 		assert(activeGeneralizer.size() == newGeneralizer.size());
 		for (int i = 0; i < activeGeneralizer.size(); i++) {
 			Iterator<Entry<String, Generalizer>> it = 
@@ -82,6 +81,12 @@ public class Dataset {
 		}
 	}
 
+	public void addActiveGeneralizers(int selectedAttributeIndex, Generalizer newGeneralizer) {
+		if (!activeGeneralizer.get(selectedAttributeIndex).containsKey(newGeneralizer.getId())) {
+			activeGeneralizer.get(selectedAttributeIndex).put(newGeneralizer.getId(), newGeneralizer);
+		}
+	}
+	
 	public void sort() {
 		//activeGeneralizer = (ArrayList<LinkedHashMap<String, Generalizer>>) generalizer.clone();
 		System.out.println("Generalizers : " + generalizer);
@@ -133,7 +138,7 @@ public class Dataset {
 						
 						while ((c0 == -1 || c1 == -1) && generalizerIt.hasNext()) {
 							entry = generalizerIt.next();
-							if (nextActiveEntry != null && !entry.getKey().equals(nextActiveEntry.getKey())) {
+							if (nextActiveEntry != null && entry.getKey().equals(nextActiveEntry.getKey())) {
 								generalizerIt.previous();
 								break;
 							}
@@ -149,18 +154,18 @@ public class Dataset {
 								System.out.println("Error comparing tuples.");
 								return 1;
 							}
-							count++;	
+							
 						}
-						
+						count++;	
 						if (c0 != -1 && c1 != -1)
 							break;
+						//System.out.println(c0 + " " + c1);
 					}
 				}
 				if (c0 < c1) {
 					System.out.println("The tuples " + t0.toString() + " and " + t1.toString() + " are different");
 					return 1;
 				}
-					
 				else if (c0 > c1){
 					System.out.println("The tuples " + t0.toString() + " and " + t1.toString() + " are different");
 					return -1;

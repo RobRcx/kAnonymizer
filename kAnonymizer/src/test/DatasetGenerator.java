@@ -22,23 +22,29 @@ public class DatasetGenerator {
 	public static void main(String args[]) {
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
 			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 
-					new NumericGeneralizer("1", 10, 29), new NumericGeneralizer("2", 30, 39),
+					new NumericGeneralizer("1", 10, 29), 
+					new NumericGeneralizer("2", 30, 39),
 					new NumericGeneralizer("3", 40, 49)
 			})));
 			add( new ArrayList<Generalizer>(Arrays.asList(new CategoricGeneralizer[] { 
-					new CategoricGeneralizer("4", "M"), new CategoricGeneralizer("5", "F")
+					new CategoricGeneralizer("4", "M"), 
+					new CategoricGeneralizer("5", "F")
 			})));
 			add( new ArrayList<Generalizer>(Arrays.asList(new CategoricGeneralizer[] { 
-					new CategoricGeneralizer("6", "Married"), new CategoricGeneralizer("7", "Widowed"),
-					new CategoricGeneralizer("8", "Divorced"), new CategoricGeneralizer("9", "Never Married")
+					new CategoricGeneralizer("6", "Married"), 
+					new CategoricGeneralizer("7", "Widowed"),
+					new CategoricGeneralizer("8", "Divorced"), 
+					new CategoricGeneralizer("9", "Never Married")
 			})));
 		}};
-		ArrayList<ArrayList<String>> data = generate(200, generalizer);
+		ArrayList<ArrayList<String>> data = generate(100, generalizer);
 		
 		for (ArrayList<String> t : data)
 			System.out.println(t);
 		
 		Dataset dataset = new Dataset(data, generalizer);
+		dataset.addActiveGeneralizers(0, generalizer.get(0).get(2));
+		dataset.addActiveGeneralizers(1, generalizer.get(1).get(1));
 		dataset.sort();
 		
 		ArrayList<Tuple> tupleDataset = dataset.data;
