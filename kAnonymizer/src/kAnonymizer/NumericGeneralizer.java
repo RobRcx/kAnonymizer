@@ -1,5 +1,13 @@
 package kAnonymizer;
 
+/**
+ * 
+ * @author Roberto Ronco, Dario Capozzi
+ * 
+ * Concrete class that contains lower and upper bound of an interval
+ * in order to check if a number matches that interval.
+ *
+ */
 public class NumericGeneralizer extends Generalizer {
 	public int lb, ub;
 	

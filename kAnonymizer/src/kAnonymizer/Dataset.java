@@ -11,7 +11,19 @@ import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
+/**
+ * 
+ * @author Roberto Ronco, Dario Capozzi
+ * 
+ * Dataset class has three members.
+ * ArrayList<Tuple> data represents a database that needs to be anonymized.
+ * ArrayList<LinkedHashMap<String, Generalizer>> contains a 
+ * LinkedHashMap<String, Generalizer> for each attribute available in the 
+ * target table structure. 
+ */
+
 public class Dataset {
+	
 	public ArrayList<Tuple> data;
 	public ArrayList<LinkedHashMap<String, Generalizer>> generalizer;
 	public ArrayList<LinkedHashMap<String, Generalizer>> activeGeneralizer;
@@ -19,10 +31,22 @@ public class Dataset {
 	public interface ArrayListStringRef extends Supplier<ArrayList<ArrayList<String>>> {}
 	public Dataset(ArrayListStringRef data, ArrayList<LinkedHashMap<String, Generalizer>> generalizer) {
 		
+		/*
+		 * Fills this.data with tuples provided in the first constructor's argument.
+		 */
+		
 		this.data = new ArrayList<Tuple>();
 		for (ArrayList<String> tuple : data.get()) {
 			this.data.add(new Tuple(tuple));
 		}
+		
+		/*
+		 * Assigns this.generalizer to the one provided in the second 
+		 * constructor argument, then, for each generalizer element, i.e.
+		 * for each attribute in a tuple, adds a LinkedHashMap to the 
+		 * activeGeneralizer and puts into it the first generalization 
+		 * available for that attribute from the set of all generalizations. 
+		 */
 		
 		this.generalizer = generalizer;
 		this.activeGeneralizer = new ArrayList<LinkedHashMap<String, Generalizer>>();
@@ -69,6 +93,7 @@ public class Dataset {
 		}
 	}
 	
+	
 	public void addActiveGeneralizers(ArrayList<LinkedHashMap<String, Generalizer>> newGeneralizer) {
 		assert(activeGeneralizer.size() == newGeneralizer.size());
 		for (int i = 0; i < activeGeneralizer.size(); i++) {
@@ -81,12 +106,20 @@ public class Dataset {
 		}
 	}
 
+	/**
+	 * Provides a method to specify a new activeGeneralizer for the selected tuple attribute. 
+	 * @param newGeneralizer
+	 */
 	public void addActiveGeneralizers(int selectedAttributeIndex, Generalizer newGeneralizer) {
 		if (!activeGeneralizer.get(selectedAttributeIndex).containsKey(newGeneralizer.getId())) {
 			activeGeneralizer.get(selectedAttributeIndex).put(newGeneralizer.getId(), newGeneralizer);
 		}
 	}
 	
+	/**
+	 * Perform an efficient sort of the tuples, according to the activeGeneralizer specified for
+	 * each attribute in the tuples structure
+	 */
 	public void sort() {
 		//activeGeneralizer = (ArrayList<LinkedHashMap<String, Generalizer>>) generalizer.clone();
 		System.out.println("Generalizers : " + generalizer);
@@ -94,6 +127,13 @@ public class Dataset {
 		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));
 	}
 	
+	
+	/**
+	 * Comparer implements the Comparator interface in order to allow the 
+	 * utilization of the Collections.sort() method.
+	 * @author Roberto Ronco, Dario Capozzi
+	 *
+	 */
 	public class Comparer implements Comparator<Tuple> {
 		
 		private ArrayList<LinkedHashMap<String, Generalizer>> generalizer,
@@ -105,16 +145,39 @@ public class Dataset {
 			this.activeGeneralizer = activeGeneralizer;
 		}
 		
+		/**
+		 * Returns -1 if t0 > t1, 1 if t0 < t1, 0 if they are equals. 
+		 */
 		@Override
 		public int compare(Tuple t0, Tuple t1) {
+			assert(t0.data.size() == t1.data.size());
+			/*
+			 * Iterates over all the available attributes of t0 
+			 */
 			for (int i = 0; i < t0.data.size(); i++) {
 				//System.out.println("Processing tuple " + i + "...");
+				/*
+				 * c0, c1 represents in what union of intervals contains 
+				 * the i-th attribute of t0 and t1, respectively. 
+				 */
 				int c0, c1;
 				c0 = c1 = -1;
+				/*
+				 * For the i-th attribute, iterates over the activeGeneralizer
+				 * available for that attribute.
+				 */
 				for (int j = 0; j < activeGeneralizer.get(i).size(); j++) {
 					//System.out.println("Processing generalizer " + j);
 					
 					c0 = c1 = -1;
+					
+					/*
+					 * activeGeneralizerIt and generalizerIt are used in order 
+					 * to iterate over all available activeGeneralizers and 
+					 * generalizers, respectively. The ListIterator interface
+					 * is used in order to have the possibility to iterate 
+					 * forward and backward.
+					 */
 					
 					ListIterator<Entry<String, Generalizer>> activeGeneralizerIt = 
 							this.getListIteratorFrom(activeGeneralizer.get(i).entrySet().iterator());
@@ -122,7 +185,20 @@ public class Dataset {
 					ListIterator<Entry<String, Generalizer>> generalizerIt = 
 							this.getListIteratorFrom(generalizer.get(i).entrySet().iterator());
 					
+					/*
+					 * count represents the actual union of intervals, from all
+					 * the available intervals for the i-th attribute.
+					 */
+					
 					int count = 0;
+					
+					/*
+					 * while there is at least an activeGeneralizer available,
+					 * gets the next activeGeneralizer, and checks for the 
+					 * availability of the following one. If it is available,
+					 * it is stored, and the activeGeneralizerIt is stepped 
+					 * back.
+					 */
 					
 					while (activeGeneralizerIt.hasNext()) {
 						Entry<String, Generalizer> entry = activeGeneralizerIt.next();
@@ -136,13 +212,32 @@ public class Dataset {
 						//if (nextActiveEntry != null)
 						//	System.out.println("Next active generalizer : " + nextActiveEntry.getKey());
 						
+						/*
+						 * Iterates until both tuples attributes are matched 
+						 * with a union of generalizer intervals or no 
+						 * generalizer is left.   
+						 */
+						
 						while ((c0 == -1 || c1 == -1) && generalizerIt.hasNext()) {
+							/*
+							 * The next generalizer in the considered union of 
+							 * intervals is stored.
+							 * If it matches with the nextActiveEntry (i.e. it
+							 * belongs to the next union of intervals), then 
+							 * the generalizerIt is stepped back and the 
+							 * iteration ends.
+							 */
 							entry = generalizerIt.next();
 							if (nextActiveEntry != null && entry.getKey().equals(nextActiveEntry.getKey())) {
 								generalizerIt.previous();
 								break;
 							}
-							
+							/*
+							 * Checks if t0 and t1 i-th attribute value is 
+							 * contained in the current generalizer (entry). 
+							 * If it is true, it saves the current value of
+							 * count to c0, c1, respectively.
+							 */
 							try {
 								if (entry.getValue().contains(t0.data.get(i))) {
 									c0 = count;
@@ -156,12 +251,23 @@ public class Dataset {
 							}
 							
 						}
-						count++;	
+						count++;
+						/*
+						 * If c0 and c1 are not equal to -1, then the current 
+						 * union of intervals is the one which the tuples 
+						 * attributes belong to.
+						 */
 						if (c0 != -1 && c1 != -1)
 							break;
 						//System.out.println(c0 + " " + c1);
 					}
 				}
+				assert(c0 != -1 && c1 != -1);
+				/*
+				 * If c0 < c1 then the i-th attribute of t0 is in a union of 
+				 * intervals before than the one containing the i-th attribute
+				 * of t1, according to the total order between intervals.
+				 */
 				if (c0 < c1) {
 					System.out.println("The tuples " + t0.toString() + " and " + t1.toString() + " are different");
 					return 1;

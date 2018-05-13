@@ -1,5 +1,12 @@
 package kAnonymizer;
 
+/**
+ * 
+ * @author Roberto Ronco, Dario Capozzi
+ * 
+ * Concrete class that contains a particular String value.
+ *
+ */
 public class CategoricGeneralizer extends Generalizer{
 	
 	public String value;
