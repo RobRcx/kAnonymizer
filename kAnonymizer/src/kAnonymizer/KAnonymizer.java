@@ -75,4 +75,15 @@ public class KAnonymizer {
 		
 		return cost;
 	}
+	
+	public class Pair {
+		private int attributeIndex, generalizerIndex;
+
+		public Pair(int attributeIndex, int generalizerIndex) {
+			super();
+			this.attributeIndex = attributeIndex;
+			this.generalizerIndex = generalizerIndex;
+		}
+		
+	}
 }
