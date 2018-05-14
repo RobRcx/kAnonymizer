@@ -98,7 +98,7 @@ public class Dataset {
 	 * each attribute in the tuples structure
 	 */
 	public void sort() {
-		activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
+		//activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
 		System.out.println("Generalizers : " + generalizer);
 		System.out.println("Active generalizers : " + activeGeneralizer);
 		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));
