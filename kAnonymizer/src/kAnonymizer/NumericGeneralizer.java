@@ -22,5 +22,10 @@ public class NumericGeneralizer extends Generalizer {
 		Float f = Float.parseFloat(o.toString());
 		return lb <= f && f <= ub;
 	}
+	
+	@Override
+	public String toString() {
+		return id + ", (" + lb + ", " + ub + ")";
+	}
 
 }

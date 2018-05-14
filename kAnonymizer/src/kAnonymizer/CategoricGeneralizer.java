@@ -21,5 +21,10 @@ public class CategoricGeneralizer extends Generalizer{
 	public boolean contains(Object o) throws Exception {
 		return o.toString().equals(this.value);
 	}
+	
+	@Override
+	public String toString() {
+		return id + ", " + value;
+	}
 
 }
