@@ -76,15 +76,19 @@ public class Dataset {
 		}
 	}*/
 	
-	public void addActiveGeneralizers(ArrayList<ArrayList<Generalizer>> newGeneralizer) {
+	public void addActiveGeneralizer(ArrayList<ArrayList<Generalizer>> newGeneralizer) {
 		activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) newGeneralizer.clone();
+	}
+	
+	public void resetActiveGeneralizer(int attributeIndex, int generalizerIndex) {
+		activeGeneralizer.get(attributeIndex).add(generalizerIndex, null);
 	}
 
 	/**
 	 * Provides a method to specify a new activeGeneralizer for the selected tuple attribute. 
 	 * @param newGeneralizer
 	 */
-	public void addActiveGeneralizers(int attributeIndex, int generalizerIndex) {
+	public void addActiveGeneralizer(int attributeIndex, int generalizerIndex) {
 		activeGeneralizer.get(attributeIndex).remove(generalizerIndex);
 		activeGeneralizer.get(attributeIndex).add(generalizerIndex, generalizer.get(attributeIndex).get(generalizerIndex));
 	}

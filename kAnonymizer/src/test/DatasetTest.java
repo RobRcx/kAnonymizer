@@ -105,8 +105,8 @@ class DatasetTest {
 		 * Test 1
 		 */
 		
-		dataset.addActiveGeneralizers(0, 2);
-		dataset.addActiveGeneralizers(1, 1);
+		dataset.addActiveGeneralizer(0, 2);
+		dataset.addActiveGeneralizer(1, 1);
 		
 		System.out.println("Testing dataset sort with active generalizers: ");
 		
@@ -120,7 +120,7 @@ class DatasetTest {
 		 * Test 2
 		 */
 		
-		dataset.addActiveGeneralizers(generalizer);
+		dataset.addActiveGeneralizer(generalizer);
 		
 		System.out.println("Testing dataset sort with active generalizers: ");
 		
