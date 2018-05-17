@@ -56,7 +56,7 @@ class DatasetTest {
 
 	@Test
 	void testSort() {
-		int tuples = 20;
+		int tuples = 100;
 		
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
 			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 
