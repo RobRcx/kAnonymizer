@@ -65,7 +65,6 @@ public class KAnonymizer {
 	 * @return
 	 */
 	private int kOptimizeRecursive(ArrayList<Pair> headSet, ArrayList<Pair> tailSet, Integer bestCost) {
-		tailSet = new ArrayList<Pair>(tailSet);
 		tailSet = pruneUselessValues(headSet, tailSet);
 		int nodeAnonymizationCost = computeCost(headSet);
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
@@ -76,14 +75,27 @@ public class KAnonymizer {
 			Pair p = iterator.next();
 			ArrayList<Pair> newHeadSet = new ArrayList<Pair>(headSet); newHeadSet.add(p);
 			iterator.remove();
-			bestCost = kOptimizeRecursive(newHeadSet, tailSet, bestCost);
+			bestCost = kOptimizeRecursive(newHeadSet, new ArrayList<Pair>(tailSet), bestCost);
 		}
 		return 0;
 	}
 	
 	
 	private ArrayList<Pair> pruneUselessValues(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
-		// TODO
+		ArrayList<Tuple> sortedData = sortDataset(headSet);
+		ArrayList<Integer> classesIndex = getEquivalenceClassesStartingIndex(sortedData);
+		
+		for (Pair p : tailSet) {
+			headSet.add(p);
+			
+			for (int i = 0; i < sortedData.size() - 1; i++) {
+			}
+			
+			headSet.remove(headSet.size() - 1);
+		}
+		
+		
+		
 		return tailSet;
 	}
 	
@@ -132,9 +144,55 @@ public class KAnonymizer {
 		
 	}
 	
+	private ArrayList<Tuple> sortDataset(ArrayList<Pair> generalizer) {
+		// Removes all generalizers
+		for (Pair p : generalizerIndices)
+			dataset.resetActiveGeneralizer(p.getAttributeIndex(), p.getGeneralizerIndex());
+		
+		// Sets generalizers in headSet as active generalizers
+		if (generalizer != null)
+			for (Pair p : generalizer)
+				dataset.addActiveGeneralizer(p.getAttributeIndex(), p.getGeneralizerIndex());
+		
+		dataset.sort();
+		return dataset.getData();
+	}
+	
 	private int computeLowerBound(ArrayList<Pair> headSet, ArrayList<Pair> allSet) {
-		// TODO
-		return Integer.MAX_VALUE;
+		assert(headSet.size() != 0);
+		assert(allSet.size() != 0);
+		
+		/*
+		 * Compute first term of DC (Discernibility Metric)
+		 * lower bound cost
+		 */
+		
+		ArrayList<Tuple> sortedData = sortDataset(headSet);
+		ArrayList<Integer> classesIndex = getEquivalenceClassesStartingIndex(sortedData);
+		
+		int lowerBound = 0; // Init cost to 0
+		
+		for (int i = 0; i < classesIndex.size() - 1; i++) {
+			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
+			if (diff < k) 
+				lowerBound += diff * sortedData.size();
+		}
+		
+		/*
+		 * Compute second term of DC (Discernibility Metric)
+		 * lower bound cost
+		 */
+
+		sortedData = sortDataset(allSet);
+		classesIndex = getEquivalenceClassesStartingIndex(sortedData);
+		
+		for (int i = 0; i < classesIndex.size() - 1; i++) {
+			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
+			if (diff >= k)
+				lowerBound += diff > k ? diff * diff : diff * k;
+		}
+		
+		return lowerBound;
 	}
 	
 	private ArrayList<Pair> reorderTail(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
@@ -146,37 +204,35 @@ public class KAnonymizer {
 	private int computeCost(ArrayList<Pair> headSet) {
 		assert(headSet.size() != 0);
 
-		// Remove all generalizers
-		for (Pair p : generalizerIndices) {
-			dataset.resetActiveGeneralizer(p.getAttributeIndex(), p.getGeneralizerIndex());
-		}
-		
-		// Set generalizers in headSet as active generalizers
-		for (Pair p : headSet) {
-			dataset.addActiveGeneralizer(p.getAttributeIndex(), p.getGeneralizerIndex());
-		}
-		
-		dataset.sort();
-		ArrayList<Tuple> sortedData = dataset.getData();
+		ArrayList<Tuple> sortedData = sortDataset(headSet);
+		ArrayList<Integer> classesIndex = getEquivalenceClassesStartingIndex(sortedData);
 		
 		int cost = 0; // Init cost to 0
-		int count = 1; // Init count of tuples in equivalence class to 0
-		for (int i = 0; i < sortedData.size(); i++) {
-			if (sortedData.get(i).compareTo(sortedData.get(i + 1)) == 0) {
-				count++;
+		
+		for (int i = 0; i < classesIndex.size() - 1; i++) {
+			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
+			if (diff >= k) {
+				cost += diff * diff;
 			}
 			else {
-				// new equivalence class found
-				if (count >= k) {
-					cost += count * count;
-				}
-				else
-					cost += count * sortedData.size();
-				// reset the count
-				count = 1;
+				cost += diff * sortedData.size();
 			}
 		}
+		
 		return cost;
+	}
+	
+	private ArrayList<Integer> getEquivalenceClassesStartingIndex(ArrayList<Tuple> sortedData) {
+		ArrayList<Integer> index = new ArrayList<Integer>(Arrays.asList(new Integer[] {0}));
+		
+		for (int i = 0; i < sortedData.size() - 1; i++) {
+			if (sortedData.get(i).compareTo(sortedData.get(i + 1)) != 0) {
+				// new equivalence class found
+				index.add(i + 1);
+			}
+		}
+		
+		return index;
 	}
 	
 	public class Pair implements Comparable<Pair> {

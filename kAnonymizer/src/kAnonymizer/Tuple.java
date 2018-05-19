@@ -13,6 +13,10 @@ public class Tuple implements Comparable<Tuple>{
 		return data;
 	}
 	
+	public String getAttribute(int i) {
+		return data.get(i);
+	}
+	
 	@Override
 	public int compareTo(Tuple t) {
 		ArrayList<String> data = t.getData();
