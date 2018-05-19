@@ -98,10 +98,17 @@ public class Dataset {
 	 * each attribute in the tuples structure
 	 */
 	public void sort() {
-		//activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
-		System.out.println("Generalizers : " + generalizer);
-		System.out.println("Active generalizers : " + activeGeneralizer);
+		// activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
+		// System.out.println("Generalizers : " + generalizer);
+		// System.out.println("Active generalizers : " + activeGeneralizer);
 		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));
+	}
+	
+	public void sort(int start, int end) {
+		// activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
+		// System.out.println("Generalizers : " + generalizer);
+		// System.out.println("Active generalizers : " + activeGeneralizer);
+		Collections.sort(data.subList(start, end), new Comparer(generalizer, activeGeneralizer));
 	}
 	
 	public ArrayList<Tuple> getData() {

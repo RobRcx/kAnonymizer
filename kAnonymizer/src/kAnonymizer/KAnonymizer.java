@@ -32,7 +32,7 @@ public class KAnonymizer {
 		this.generalizerIndices = new ArrayList<>();
 		for (int i = 0; i < generalizer.size(); i++) {
 			for (int j = 0; j < generalizer.get(i).size(); j++) {
-				generalizerIndices.add(new Pair(i, j));
+				generalizerIndices.add(new Pair(generalizer.get(i).get(j).getId(), i, j));
 			}
 		}
 	}
@@ -52,6 +52,8 @@ public class KAnonymizer {
 	    	tailSet.add(p);
 	    }
 		
+	    System.out.println("Starting recursion...\n");
+	    
 		return kOptimizeRecursive(headSet, tailSet, Integer.MAX_VALUE);
 	}
 	
@@ -65,11 +67,22 @@ public class KAnonymizer {
 	 * @return
 	 */
 	private int kOptimizeRecursive(ArrayList<Pair> headSet, ArrayList<Pair> tailSet, Integer bestCost) {
-		tailSet = pruneUselessValues(headSet, tailSet);
+		
+		System.out.println("HeadSet : " + headSet + "  TailSet : " + tailSet);
+		
+		pruneUselessValues(headSet, tailSet);
+		
 		int nodeAnonymizationCost = computeCost(headSet);
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
+		
+		System.out.println("New best cost : " + bestCost);
+		
 		tailSet = prune(headSet, tailSet, bestCost);
-		tailSet = reorderTail(headSet, tailSet);
+		if (tailSet == null)
+			return bestCost;
+		
+		reorderTail(headSet, tailSet);
+		
 		Iterator<Pair> iterator = tailSet.iterator();
 		while (!tailSet.isEmpty()) {
 			Pair p = iterator.next();
@@ -77,30 +90,57 @@ public class KAnonymizer {
 			iterator.remove();
 			bestCost = kOptimizeRecursive(newHeadSet, new ArrayList<Pair>(tailSet), bestCost);
 		}
-		return 0;
+		return bestCost;
 	}
 	
 	
-	private ArrayList<Pair> pruneUselessValues(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
+	private void pruneUselessValues(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
 		ArrayList<Tuple> sortedData = sortDataset(headSet);
 		ArrayList<Integer> classesIndex = getEquivalenceClassesStartingIndex(sortedData);
 		
-		for (Pair p : tailSet) {
-			headSet.add(p);
+		classesIndex.add(sortedData.size() - 1);
+		
+		for (int t = 0; t < tailSet.size(); t++) {
+			headSet.add(tailSet.get(t));
 			
-			for (int i = 0; i < sortedData.size() - 1; i++) {
+			//ArrayList<Integer> newClassesIndex = getEquivalenceClassesStartingIndex(sortDataset(headSet));
+			int i;
+			for (i = 0; i < classesIndex.size() - 1; i++) {
+				// Sorts the i-th equivalence class basing on (headSet united with p)
+				ArrayList<Tuple> newSortedData = sortDataset(headSet, classesIndex.get(i), classesIndex.get(i + 1));
+				// Gets the new starting indices of equivalence classes within the considered equivalence class
+				ArrayList<Integer> newClassesIndex = getEquivalenceClassesStartingIndex(newSortedData);
+				// If the added generalizer (p) splits the equivalence class
+				if (newClassesIndex.size() > classesIndex.size()) {
+					int j;
+					for (j = 0; j < newClassesIndex.size(); j++)
+						if (newClassesIndex.get(j + 1) - newClassesIndex.get(j) - 1 >= k)
+							break;
+					if (j < newClassesIndex.size())
+						break;
+				}
+			}
+			
+			
+			/*
+			 * If the condition j < newClassesIndex.size() is never satisfied,
+			 * then the generalizer tailset.get(t).getGeneralizerIndex of the
+			 * attribute tailSet.get(t).getAttributeIndex splits every 
+			 * equivalence class of sortedData in equivalence classes sized
+			 * less than k.
+			 * Therefore, the t-th generalizer of tailSet can be removed.
+			 */
+			if (i == classesIndex.size()) {
+				tailSet.remove(t);
+				t--;
 			}
 			
 			headSet.remove(headSet.size() - 1);
 		}
-		
-		
-		
-		return tailSet;
 	}
 	
 	/**
-	 * This function creates and returns a new tail by removing values from T
+	 * This function creates and returns a new tail by removing values from tailSet
 	 * that cannot lead to anonymizations with cost lower than bestCost
 	 * @param headSet
 	 * @param tailSet
@@ -158,9 +198,23 @@ public class KAnonymizer {
 		return dataset.getData();
 	}
 	
+	private ArrayList<Tuple> sortDataset(ArrayList<Pair> generalizer, int start, int end) {
+		// Removes all generalizers
+		for (Pair p : generalizerIndices)
+			dataset.resetActiveGeneralizer(p.getAttributeIndex(), p.getGeneralizerIndex());
+		
+		// Sets generalizers in headSet as active generalizers
+		if (generalizer != null)
+			for (Pair p : generalizer)
+				dataset.addActiveGeneralizer(p.getAttributeIndex(), p.getGeneralizerIndex());
+		
+		dataset.sort(start, end);
+		return dataset.getData();
+	}
+	
 	private int computeLowerBound(ArrayList<Pair> headSet, ArrayList<Pair> allSet) {
-		assert(headSet.size() != 0);
-		assert(allSet.size() != 0);
+		//assert(headSet.size() != 0);
+		//assert(allSet.size() != 0);
 		
 		/*
 		 * Compute first term of DC (Discernibility Metric)
@@ -195,26 +249,26 @@ public class KAnonymizer {
 		return lowerBound;
 	}
 	
-	private ArrayList<Pair> reorderTail(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
+	private void reorderTail(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
 		// TODO
-		return tailSet;
 	}
 	
 	// Anonymize with the headSet
 	private int computeCost(ArrayList<Pair> headSet) {
-		assert(headSet.size() != 0);
+		//assert(headSet.size() != 0);
 
-		ArrayList<Tuple> sortedData = sortDataset(headSet);
+		ArrayList<Tuple> sortedData = sortDataset(headSet); 
 		ArrayList<Integer> classesIndex = getEquivalenceClassesStartingIndex(sortedData);
 		
 		int cost = 0; // Init cost to 0
 		
 		for (int i = 0; i < classesIndex.size() - 1; i++) {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
+			// If the equivalence class size is greater than k, then:
 			if (diff >= k) {
 				cost += diff * diff;
 			}
-			else {
+			else { // otherwise it is a suppressed group of tuples, hence the cost addition:
 				cost += diff * sortedData.size();
 			}
 		}
@@ -227,7 +281,7 @@ public class KAnonymizer {
 		
 		for (int i = 0; i < sortedData.size() - 1; i++) {
 			if (sortedData.get(i).compareTo(sortedData.get(i + 1)) != 0) {
-				// new equivalence class found
+				// New equivalence class found => adds starting index to index
 				index.add(i + 1);
 			}
 		}
@@ -236,6 +290,7 @@ public class KAnonymizer {
 	}
 	
 	public class Pair implements Comparable<Pair> {
+		private String id;
 		private int attributeIndex, generalizerIndex;
 
 		public int getAttributeIndex() {
@@ -246,8 +301,8 @@ public class KAnonymizer {
 			return generalizerIndex;
 		}
 
-		public Pair(int attributeIndex, int generalizerIndex) {
-			super();
+		public Pair(String id, int attributeIndex, int generalizerIndex) {
+			this.id = id;
 			this.attributeIndex = attributeIndex;
 			this.generalizerIndex = generalizerIndex;
 		}
@@ -265,6 +320,11 @@ public class KAnonymizer {
 					return 1;
 			}
 			return 0;
+		}
+		
+		@Override
+		public String toString() {
+			return id;
 		}
 		
 	}
