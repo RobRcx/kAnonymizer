@@ -70,18 +70,18 @@ public class KAnonymizer {
 		
 		System.out.println("HeadSet : " + headSet + "  TailSet : " + tailSet);
 		
-		pruneUselessValues(headSet, tailSet);
+		// pruneUselessValues(headSet, tailSet);
 		
 		int nodeAnonymizationCost = computeCost(headSet);
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
 		System.out.println("New best cost : " + bestCost);
 		
-		tailSet = prune(headSet, tailSet, bestCost);
+		// tailSet = prune(headSet, tailSet, bestCost);
 		if (tailSet == null)
-			return bestCost;
+		  	return bestCost;
 		
-		reorderTail(headSet, tailSet);
+		// reorderTail(headSet, tailSet);
 		
 		Iterator<Pair> iterator = tailSet.iterator();
 		while (!tailSet.isEmpty()) {
