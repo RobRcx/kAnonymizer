@@ -56,7 +56,7 @@ class KAnonymizerTest {
 
 	@Test
 	void test() {
-		int tuples = 100000;
+		int tuples = 10000;
 		
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
 			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 

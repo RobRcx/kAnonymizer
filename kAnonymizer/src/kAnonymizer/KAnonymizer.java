@@ -37,12 +37,12 @@ public class KAnonymizer {
 		}
 	}
 	
-	public int kOptimize(int k) {
+	public Long kOptimize(int k) {
 		this.k = k;
 		return kOptimize();
 	}
 	
-	public int kOptimize() {
+	public Long kOptimize() {
 		// Builds head set. No attribute generalization at the beginning
 		ArrayList<Pair> headSet = new ArrayList<>();
 		
@@ -54,7 +54,7 @@ public class KAnonymizer {
 		
 	    System.out.println("Starting recursion...\n");
 	    
-		return kOptimizeRecursive(headSet, tailSet, Integer.MAX_VALUE);
+		return kOptimizeRecursive(headSet, tailSet, Long.MAX_VALUE);
 	}
 	
 	/**
@@ -66,20 +66,20 @@ public class KAnonymizer {
 	 * @param bestCost
 	 * @return
 	 */
-	private int kOptimizeRecursive(ArrayList<Pair> headSet, ArrayList<Pair> tailSet, Integer bestCost) {
+	private Long kOptimizeRecursive(ArrayList<Pair> headSet, ArrayList<Pair> tailSet, Long bestCost) {
 		
 		System.out.println("HeadSet : " + headSet + "  TailSet : " + tailSet);
 		
 		// pruneUselessValues(headSet, tailSet);
 		
-		int nodeAnonymizationCost = computeCost(headSet);
+		Long nodeAnonymizationCost = computeCost(headSet);
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
 		System.out.println("New best cost : " + bestCost);
 		
-		// tailSet = prune(headSet, tailSet, bestCost);
-		// if (tailSet == null)
-		//  	return bestCost;
+		tailSet = prune(headSet, tailSet, bestCost);
+		if (tailSet == null)
+			return bestCost;
 		
 		// reorderTail(headSet, tailSet);
 		
@@ -151,7 +151,7 @@ public class KAnonymizer {
 	 * @param bestCost
 	 * @return
 	 */
-	private ArrayList<Pair> prune(ArrayList<Pair> headSet, ArrayList<Pair> tailSet, Integer bestCost) {
+	private ArrayList<Pair> prune(ArrayList<Pair> headSet, ArrayList<Pair> tailSet, Long bestCost) {
 		ArrayList<Pair> allSet = new ArrayList<>(headSet);
 		// ArrayList<Pair> tailSetBackup = new ArrayList(tailSet);
 		
@@ -258,13 +258,13 @@ public class KAnonymizer {
 	}
 	
 	// Anonymize with the headSet
-	private int computeCost(ArrayList<Pair> headSet) {
+	private Long computeCost(ArrayList<Pair> headSet) {
 		//assert(headSet.size() != 0);
 
 		ArrayList<Tuple> sortedData = sortDataset(headSet); 
 		ArrayList<Integer> classesIndex = getEquivalenceClassesBoundaries(sortedData);
 		
-		int cost = 0; // Init cost to 0
+		Long cost = 0l; // Init cost to 0
 		
 		for (int i = 0; i < classesIndex.size() - 1; i++) {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
