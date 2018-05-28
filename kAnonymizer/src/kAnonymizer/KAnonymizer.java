@@ -159,14 +159,24 @@ public class KAnonymizer {
 		allSet.addAll(tailSet);
 		Collections.sort(allSet); // really necessary?
 		
-		if (computeLowerBound(headSet, allSet) >= bestCost)
+		
+		System.out.println("\nThe headset is " + headSet);
+		System.out.println("The tailset is " + tailSet);
+		System.out.println("The allset is " + allSet);
+		
+		Long lowerBound = computeLowerBound(headSet, allSet); 
+		
+		System.out.println("Lower bound is " + lowerBound + ", best cost is " + bestCost);
+		if (lowerBound >= bestCost)
 			return null;
 		
 		ArrayList<Pair> newTailSet = new ArrayList<>(tailSet);
 		
-		for (int i = 0; i < newTailSet.size(); i++) {
+		for (int i = 0; i < tailSet.size(); i++) {
 			ArrayList<Pair> newHeadSet = new ArrayList<>(headSet);
 			newHeadSet.add(newTailSet.get(i));
+			Collections.sort(newHeadSet); // really necessary?
+			
 			Pair pairBackup = newTailSet.get(i);
 			newTailSet.remove(i);
 			if (prune(newHeadSet, newTailSet, bestCost) == null) {
@@ -216,39 +226,43 @@ public class KAnonymizer {
 		return dataset.getData();
 	}
 	
-	private int computeLowerBound(ArrayList<Pair> headSet, ArrayList<Pair> allSet) {
-		//assert(headSet.size() != 0);
-		//assert(allSet.size() != 0);
+	private Long computeLowerBound(ArrayList<Pair> headSet, ArrayList<Pair> allSet) {
+		ArrayList<Tuple> headSetSortedData = sortDataset(headSet);
+		ArrayList<Integer> headSetClassesIndex = getEquivalenceClassesBoundaries(headSetSortedData);
+		
+		ArrayList<Tuple> allSetSortedData = sortDataset(allSet);
+		ArrayList<Integer> allSetClassesIndex = getEquivalenceClassesBoundaries(allSetSortedData);
 		
 		/*
-		 * Compute first term of DC (Discernibility Metric)
-		 * lower bound cost
+		 * Implements the lower bound equation in Bayardo05, page 6
 		 */
 		
-		ArrayList<Tuple> sortedData = sortDataset(headSet);
-		ArrayList<Integer> classesIndex = getEquivalenceClassesBoundaries(sortedData);
+		Long lowerBound = 0l; // Init cost to 0
 		
-		int lowerBound = 0; // Init cost to 0
+		HashMap<Tuple, Boolean> map = new HashMap<>();
 		
-		for (int i = 0; i < classesIndex.size() - 1; i++) {
-			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
-			if (diff < k) 
-				lowerBound += diff * sortedData.size();
+		for (int i = 0; i < headSetClassesIndex.size() - 1; i++) {
+			int diff = headSetClassesIndex.get(i + 1) - headSetClassesIndex.get(i);
+			boolean val = false;
+			if (diff < k) { 
+				lowerBound += diff * headSetSortedData.size();
+				val = true;
+			}
+			for (int j = headSetClassesIndex.get(i); j < headSetClassesIndex.get(i + 1); j++)
+				map.put(headSetSortedData.get(j), val);
 		}
 		
-		/*
-		 * Compute second term of DC (Discernibility Metric)
-		 * lower bound cost
-		 */
-
-		sortedData = sortDataset(allSet);
-		classesIndex = getEquivalenceClassesBoundaries(sortedData);
-		
-		for (int i = 0; i < classesIndex.size() - 1; i++) {
-			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
-			if (diff >= k)
-				lowerBound += diff > k ? diff * diff : diff * k;
+		for (int i = 0; i < allSetClassesIndex.size() - 1; i++) {
+			int max = Math.max(allSetClassesIndex.get(i + 1) - allSetClassesIndex.get(i), k);
+			
+			for (int j = headSetClassesIndex.get(i); j < headSetClassesIndex.get(i + 1); j++) {
+				if (!map.get(allSetSortedData.get(j))) {
+					lowerBound += max;
+				}
+			}
 		}
+		
+		
 		
 		return lowerBound;
 	}
