@@ -19,6 +19,7 @@ import kAnonymizer.Dataset;
 import kAnonymizer.Generalizer;
 import kAnonymizer.KAnonymizer;
 import kAnonymizer.NumericGeneralizer;
+import kAnonymizer.Tuple;
 
 /**
  * @author Rob
@@ -56,7 +57,7 @@ class KAnonymizerTest {
 
 	@Test
 	void test() {
-		int tuples = 2000;
+		int tuples = 50000;
 		
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
 			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 
@@ -80,8 +81,8 @@ class KAnonymizerTest {
 		
 		ArrayList<ArrayList<String>> data = DatasetGenerator.generate(tuples, generalizer);
 		
-		for (ArrayList<String> t : data)
-			System.out.println(t);
+		//for (ArrayList<String> t : data)
+			//System.out.println(t);
 		
 		System.out.println("All the generalizers: ");
 		
@@ -106,4 +107,5 @@ class KAnonymizerTest {
 			System.out.println("");
 		}
 	}
+	
 }

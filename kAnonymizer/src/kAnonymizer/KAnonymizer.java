@@ -31,7 +31,7 @@ public class KAnonymizer {
 		// Stores generalizers id
 		this.generalizerIndices = new ArrayList<>();
 		for (int i = 0; i < generalizer.size(); i++) {
-			for (int j = 0; j < generalizer.get(i).size(); j++) {
+			for (int j = 1; j < generalizer.get(i).size(); j++) {
 				generalizerIndices.add(new Pair(generalizer.get(i).get(j).getId(), i, j));
 			}
 		}
@@ -77,7 +77,7 @@ public class KAnonymizer {
 		
 		System.out.println("New best cost : " + bestCost);
 		
-		tailSet = prune(headSet, tailSet, bestCost);
+		//tailSet = prune(headSet, tailSet, bestCost);
 		
 		/*
 		 * Check difference between tailSet and new tailSet for debugging purposes
@@ -312,7 +312,7 @@ public class KAnonymizer {
 		return index;
 	}
 	
-	public class Pair implements Comparable<Pair> {
+	protected class Pair implements Comparable<Pair> {
 		private String id;
 		private int attributeIndex, generalizerIndex;
 

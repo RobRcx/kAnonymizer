@@ -100,14 +100,15 @@ public class Dataset {
 	public void sort() {
 		// activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
 		// System.out.println("Generalizers : " + generalizer);
-		// System.out.println("Active generalizers : " + activeGeneralizer);
+		System.out.println("Active generalizers before sorting: " + activeGeneralizer);
 		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));
 	}
 	
 	public void sort(int start, int end) {
 		// activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
 		// System.out.println("Generalizers : " + generalizer);
-		// System.out.println("Active generalizers : " + activeGeneralizer);
+		System.out.println("Active generalizers before sorting: " + activeGeneralizer
+				+ " from " + start + " to " + end);
 		Collections.sort(data.subList(start, end), new Comparer(generalizer, activeGeneralizer));
 	}
 	
