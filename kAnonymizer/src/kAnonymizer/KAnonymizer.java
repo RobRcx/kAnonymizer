@@ -78,6 +78,11 @@ public class KAnonymizer {
 		System.out.println("New best cost : " + bestCost);
 		
 		tailSet = prune(headSet, tailSet, bestCost);
+		
+		/*
+		 * Check difference between tailSet and new tailSet for debugging purposes
+		 */
+		
 		if (tailSet == null)
 			return bestCost;
 		
@@ -157,32 +162,25 @@ public class KAnonymizer {
 		
 		// allSet.removeAll(tailSet);
 		allSet.addAll(tailSet);
-		Collections.sort(allSet); // really necessary?
+		// Collections.sort(allSet); // really necessary?
 		
-		
-		System.out.println("\nThe headset is " + headSet);
-		System.out.println("The tailset is " + tailSet);
-		System.out.println("The allset is " + allSet);
-		
-		Long lowerBound = computeLowerBound(headSet, allSet); 
-		
-		System.out.println("Lower bound is " + lowerBound + ", best cost is " + bestCost);
-		if (lowerBound >= bestCost)
+		Long lowerBound = computeLowerBound(headSet, allSet);
+		if (lowerBound >= bestCost) {
+			System.out.println("Pruning with\nheadSet " + headSet + "\ntailSet " + tailSet + "\nallSet" + allSet
+					+ "\nLower bound " + lowerBound + "\nBest cost " + bestCost);
 			return null;
+		}
 		
 		ArrayList<Pair> newTailSet = new ArrayList<>(tailSet);
 		
 		for (int i = 0; i < tailSet.size(); i++) {
 			ArrayList<Pair> newHeadSet = new ArrayList<>(headSet);
-			newHeadSet.add(newTailSet.get(i));
-			Collections.sort(newHeadSet); // really necessary?
+			newHeadSet.add(tailSet.get(i));
+			//Collections.sort(newHeadSet); // really necessary?
 			
 			Pair pairBackup = newTailSet.get(i);
 			newTailSet.remove(i);
-			if (prune(newHeadSet, newTailSet, bestCost) == null) {
-				i--;
-			}
-			else {
+			if (prune(newHeadSet, newTailSet, bestCost) != null) {
 				newTailSet.add(i, pairBackup);
 			}
 		}
