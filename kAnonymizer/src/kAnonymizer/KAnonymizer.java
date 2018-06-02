@@ -66,16 +66,32 @@ public class KAnonymizer {
 	 * @param bestCost
 	 * @return
 	 */
+	private static int c = 0;
 	private Long kOptimizeRecursive(ArrayList<Pair> headSet, ArrayList<Pair> tailSet, Long bestCost) {
+		c++;
+		System.out.println("Node " + c);
 		
 		System.out.println("HeadSet : " + headSet + "  TailSet : " + tailSet);
 		
 		// pruneUselessValues(headSet, tailSet);
 		
 		Long nodeAnonymizationCost = computeCost(headSet);
+		
+		//
+		// DEBUG
+		//
+		
+		if (nodeAnonymizationCost < bestCost) {
+			System.out.println("New best cost! " + nodeAnonymizationCost + " > " + bestCost);
+		}
+		
+		//
+		//
+		//
+		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
-		System.out.println("New best cost : " + bestCost);
+		System.out.println("Current best cost : " + bestCost);
 		
 		//tailSet = prune(headSet, tailSet, bestCost);
 		
