@@ -1,5 +1,9 @@
 package test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -37,5 +41,12 @@ public class DatasetGenerator {
 			dataset.add(data);
 		}
 		return dataset;
+	}
+	
+	// to be finished
+	public static ArrayList<ArrayList<String>> generateFromFile(String filename) throws Exception{
+		ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
+		Files.lines(Paths.get(filename)).forEach(item->System.out.println(item));
+		return output;
 	}
 }
