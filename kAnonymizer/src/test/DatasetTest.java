@@ -77,7 +77,6 @@ class DatasetTest {
 		}};
 		
 		System.out.println("Generating random dataset with " + tuples + " tuples...");
-		
 		ArrayList<ArrayList<String>> data = DatasetGenerator.generate(tuples, generalizer);
 		
 		for (ArrayList<String> t : data)

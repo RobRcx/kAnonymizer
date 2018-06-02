@@ -56,7 +56,7 @@ class KAnonymizerTest {
 	}
 
 	@Test
-	void test() {
+	void test() throws Exception {
 		int tuples = 2000000;
 		
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
@@ -79,7 +79,8 @@ class KAnonymizerTest {
 		
 		System.out.println("Generating random dataset with " + tuples + " tuples...");
 		
-		ArrayList<ArrayList<String>> data = DatasetGenerator.generate(tuples, generalizer);
+		//ArrayList<ArrayList<String>> data = DatasetGenerator.generate(tuples, generalizer);
+		ArrayList<ArrayList<String>> data = DatasetGenerator.generateFromFile("dataset.csv");
 		
 		//for (ArrayList<String> t : data)
 			//System.out.println(t);

@@ -46,7 +46,18 @@ public class DatasetGenerator {
 	// to be finished
 	public static ArrayList<ArrayList<String>> generateFromFile(String filename) throws Exception{
 		ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
-		Files.lines(Paths.get(filename)).forEach(item->System.out.println(item));
+		Files.lines(Paths.get(filename)).forEach(item->output.add(parseRow(item)));
 		return output;
 	}
+	
+	private static ArrayList<String> parseRow(String rawRow){
+		ArrayList<String> row = new ArrayList<String>();
+		int firstSeparator = rawRow.indexOf(';', 0);
+		int secondSeparator = rawRow.indexOf(';', firstSeparator + 1);
+		row.add(rawRow.substring(0, firstSeparator));
+		row.add(rawRow.substring(firstSeparator + 1, secondSeparator));
+		row.add(rawRow.substring(secondSeparator + 1));
+		return row;
+	}
+	
 }
