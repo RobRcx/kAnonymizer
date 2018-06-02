@@ -49,7 +49,7 @@ public class Dataset {
 		 */
 		
 		
-		this.generalizer = new ArrayList<>((ArrayList<ArrayList<Generalizer>>)generalizer.clone());
+		this.generalizer = new ArrayList<>(generalizer);
 		
 		activeGeneralizer = new ArrayList<>();
 		
@@ -81,6 +81,7 @@ public class Dataset {
 	}
 	
 	public void resetActiveGeneralizer(int attributeIndex, int generalizerIndex) {
+		activeGeneralizer.get(attributeIndex).remove(generalizerIndex);
 		activeGeneralizer.get(attributeIndex).add(generalizerIndex, null);
 	}
 
@@ -100,6 +101,7 @@ public class Dataset {
 	public void sort() {
 		// activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
 		// System.out.println("Generalizers : " + generalizer);
+		
 		System.out.println("Active generalizers before sorting: " + activeGeneralizer);
 		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));
 	}

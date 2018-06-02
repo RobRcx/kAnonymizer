@@ -167,7 +167,8 @@ public class KAnonymizer {
 		Long lowerBound = computeLowerBound(headSet, allSet);
 		if (lowerBound >= bestCost) {
 			System.out.println("Pruning with\nheadSet " + headSet + "\ntailSet " + tailSet + "\nallSet" + allSet
-					+ "\nLower bound " + lowerBound + "\nBest cost " + bestCost);
+					+ "\nLower bound " + lowerBound + "\nBest cos"
+							+ "t " + bestCost);
 			return null;
 		}
 		
