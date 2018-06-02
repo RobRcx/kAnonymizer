@@ -2,16 +2,8 @@ package kAnonymizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class KAnonymizer {
 	
@@ -73,21 +65,12 @@ public class KAnonymizer {
 		
 		System.out.println("HeadSet : " + headSet + "  TailSet : " + tailSet);
 		
-		// pruneUselessValues(headSet, tailSet);
+		//pruneUselessValues(headSet, tailSet);
 		
 		Long nodeAnonymizationCost = computeCost(headSet);
 		
-		//
-		// DEBUG
-		//
-		
-		if (nodeAnonymizationCost < bestCost) {
-			System.out.println("New best cost! " + nodeAnonymizationCost + " > " + bestCost);
-		}
-		
-		//
-		//
-		//
+		if (nodeAnonymizationCost < bestCost)
+			System.out.println("New best cost! " + nodeAnonymizationCost + " < " + bestCost);
 		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
@@ -118,7 +101,7 @@ public class KAnonymizer {
 	
 	private void pruneUselessValues(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
 		ArrayList<Tuple> sortedData = sortDataset(headSet);
-		ArrayList<Integer> classesIndex = getEquivalenceClassesBoundaries(sortedData);
+		ArrayList<Integer> classesIndex = dataset.getEquivalenceClassesBoundaries();
 		
 		// TO CHECK!
 		//
@@ -134,7 +117,7 @@ public class KAnonymizer {
 				// Sorts the i-th equivalence class basing on (headSet united with p)
 				ArrayList<Tuple> newSortedData = sortDataset(headSet, classesIndex.get(i), classesIndex.get(i + 1));
 				// Gets the new starting indices of equivalence classes within the considered equivalence class
-				ArrayList<Integer> newClassesIndex = getEquivalenceClassesBoundaries(newSortedData);
+				ArrayList<Integer> newClassesIndex = dataset.getEquivalenceClassesBoundaries();;
 				// If the added generalizer (p) splits the equivalence class
 				if (newClassesIndex.size() > classesIndex.size()) {
 					int j;
@@ -243,10 +226,10 @@ public class KAnonymizer {
 	
 	private Long computeLowerBound(ArrayList<Pair> headSet, ArrayList<Pair> allSet) {
 		ArrayList<Tuple> headSetSortedData = sortDataset(headSet);
-		ArrayList<Integer> headSetClassesIndex = getEquivalenceClassesBoundaries(headSetSortedData);
+		ArrayList<Integer> headSetClassesIndex = dataset.getEquivalenceClassesBoundaries();
 		
 		ArrayList<Tuple> allSetSortedData = sortDataset(allSet);
-		ArrayList<Integer> allSetClassesIndex = getEquivalenceClassesBoundaries(allSetSortedData);
+		ArrayList<Integer> allSetClassesIndex = dataset.getEquivalenceClassesBoundaries();
 		
 		/*
 		 * Implements the lower bound equation in Bayardo05, page 6
@@ -286,12 +269,11 @@ public class KAnonymizer {
 		// TODO
 	}
 	
-	// Anonymize with the headSet
 	private Long computeCost(ArrayList<Pair> headSet) {
 		//assert(headSet.size() != 0);
 
 		ArrayList<Tuple> sortedData = sortDataset(headSet); 
-		ArrayList<Integer> classesIndex = getEquivalenceClassesBoundaries(sortedData);
+		ArrayList<Integer> classesIndex = dataset.getEquivalenceClassesBoundaries();
 		
 		Long cost = 0l; // Init cost to 0
 		
@@ -299,34 +281,14 @@ public class KAnonymizer {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
 			// If the equivalence class size is greater than k, then:
 			if (diff >= k) {
-				cost += diff * diff;
+				cost += Math.multiplyExact((long) diff, (long) diff);
 			}
 			else { // otherwise it is a suppressed group of tuples, hence the cost addition:
-				cost += diff * sortedData.size();
+				cost += Math.multiplyExact((long) diff, (long) sortedData.size());
 			}
 		}
 		
 		return cost;
-	}
-	
-	private ArrayList<Integer> getEquivalenceClassesBoundaries(ArrayList<Tuple> sortedData) {
-		ArrayList<Integer> index = new ArrayList<Integer>(Arrays.asList(new Integer[] {0}));
-		
-		for (int i = 0; i < sortedData.size() - 1; i++) {
-			if (sortedData.get(i).compareTo(sortedData.get(i + 1)) != 0) {
-				// New equivalence class found => adds starting index to index
-				index.add(i + 1);
-			}
-		}
-		
-		/*
-		 *  The following add is performed to take into account
-		 *	the last equivalence class.
-		 */
-		
-		index.add(sortedData.size()); 
-		
-		return index;
 	}
 	
 	protected class Pair implements Comparable<Pair> {

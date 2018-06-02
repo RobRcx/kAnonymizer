@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 public class Dataset {
 	
 	private ArrayList<Tuple> data;
-	private ArrayList<ArrayList<Generalizer>> generalizer;
-	private ArrayList<ArrayList<Generalizer>> activeGeneralizer;
+	private ArrayList<ArrayList<Generalizer>> generalizer, activeGeneralizer;
+	private TupleComparator tupleComparator;
 	
 	public Dataset(ArrayList<ArrayList<String>> data, 
 			ArrayList<ArrayList<Generalizer>> generalizer) {
@@ -61,6 +61,8 @@ public class Dataset {
 				this.activeGeneralizer.get(i).add(null);
 			}
 		}
+		
+		tupleComparator = new TupleComparator(generalizer, activeGeneralizer);
 	}
 	
 	
@@ -99,19 +101,16 @@ public class Dataset {
 	 * each attribute in the tuples structure
 	 */
 	public void sort() {
-		// activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
-		// System.out.println("Generalizers : " + generalizer);
-		
 		System.out.println("Active generalizers before sorting: " + activeGeneralizer);
-		Collections.sort(data, new Comparer(generalizer, activeGeneralizer));
+		tupleComparator.setActiveGeneralizer(activeGeneralizer);
+		Collections.sort(data, tupleComparator);
 	}
 	
 	public void sort(int start, int end) {
-		// activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) generalizer.clone();
-		// System.out.println("Generalizers : " + generalizer);
 		System.out.println("Active generalizers before sorting: " + activeGeneralizer
 				+ " from " + start + " to " + end);
-		Collections.sort(data.subList(start, end), new Comparer(generalizer, activeGeneralizer));
+		tupleComparator.setActiveGeneralizer(activeGeneralizer);
+		Collections.sort(data.subList(start, end), tupleComparator);
 	}
 	
 	public ArrayList<Tuple> getData() {
@@ -122,6 +121,29 @@ public class Dataset {
 		return activeGeneralizer;
 	}
 	
+	public ArrayList<Integer> getEquivalenceClassesBoundaries() {
+			
+		ArrayList<Integer> index = new ArrayList<Integer>(Arrays.asList(new Integer[] {0}));
+		
+		for (int i = 0; i < data.size() - 1; i++) {
+			if (tupleComparator.compare(data.get(i), data.get(i + 1)) != 0) {
+				// New equivalence class found => adds starting index to the 'index' array
+				index.add(i + 1);
+			}
+		}
+		
+		System.out.println("Indices computed :" + index);
+		
+		/*
+		 *  The following add is performed to take into account
+		 *	the last equivalence class.
+		 */
+		
+		index.add(data.size()); 
+		
+		return index;
+	}
+	
 	
 	/**
 	 * Comparer implements the Comparator interface in order to allow the 
@@ -129,13 +151,17 @@ public class Dataset {
 	 * @author Roberto Ronco, Dario Capozzi
 	 *
 	 */
-	public class Comparer implements Comparator<Tuple> {
+	protected class TupleComparator implements Comparator<Tuple> {
 		
 		private ArrayList<ArrayList<Generalizer>> generalizer, activeGeneralizer;
 		
-		public Comparer(ArrayList<ArrayList<Generalizer>> generalizer, 
+		public TupleComparator(ArrayList<ArrayList<Generalizer>> generalizer, 
 				ArrayList<ArrayList<Generalizer>> activeGeneralizer) {
 			this.generalizer = generalizer;
+			this.activeGeneralizer = activeGeneralizer;
+		}
+		
+		public void setActiveGeneralizer(ArrayList<ArrayList<Generalizer>> activeGeneralizer) {
 			this.activeGeneralizer = activeGeneralizer;
 		}
 		
