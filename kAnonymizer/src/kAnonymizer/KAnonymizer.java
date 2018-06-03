@@ -20,21 +20,24 @@ public class KAnonymizer {
 		this.k = k;
 		this.dataset = new Dataset(dataset, generalizer);
 		
-		// Sort the dataset to determine the equivalence classes with the most general specialization
-		// this.dataset.sort();
-		
 		// Stores generalizers id
 		this.generalizerIndices = new ArrayList<>();
 		for (int i = 0; i < generalizer.size(); i++) {
+			/*
+			 * In the following loop the index starts from 1 because the first
+			 * generalizer for each attribute always must appear in a valid
+			 * generalization. Therefore, its presence cannot be altered by 
+			 * the k-anonymization algorithm. 
+			 */
 			for (int j = 1; j < generalizer.get(i).size(); j++) {
-				generalizerIndices.add(new AttributeGeneralizerIndicesInfo(generalizer.get(i).get(j).getId(), i, j));
+				generalizerIndices.add(new AttributeGeneralizerIndicesInfo(generalizer
+						.get(i).get(j).getId(), i, j));
 			}
 		}
 	}
 	
-	public Long kOptimize(int k) {
+	public void setK(int k) {
 		this.k = k;
-		return kOptimize();
 	}
 	
 	public Long kOptimize() {
@@ -62,28 +65,31 @@ public class KAnonymizer {
 	 * @return
 	 */
 	private static int c = 0;
-	private Long kOptimizeRecursive(ArrayList<AttributeGeneralizerIndicesInfo> headSet, ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
+	private Long kOptimizeRecursive(ArrayList<AttributeGeneralizerIndicesInfo> headSet,
+			ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
 		c++;
-		System.out.println("Node " + c);
+		System.out.println("\n********************** Node " + c + " ****************************");
 		
-		System.out.println("HeadSet : " + headSet + "  TailSet : " + tailSet);
+		System.out.println("kOptimizeRecursive()\n    HeadSet : " + headSet + "  TailSet : " + tailSet);
 		
 		pruneUselessValues(headSet, tailSet);
 		
+		/*
+		 * The "Long" usage takes into account the fact that 
+		 * nodeAnonymizationCost may be a very high number that 
+		 * could cause an overflow if "Integer" was used. 
+		 */
+		
 		Long nodeAnonymizationCost = computeCost(headSet);
 		
-		//if (nodeAnonymizationCost < bestCost)
-		//	System.out.println("New best cost! " + nodeAnonymizationCost + " < " + bestCost);
+		if (nodeAnonymizationCost < bestCost)
+			System.out.println("    New best cost! " + nodeAnonymizationCost + " < " + bestCost);
 		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
-		System.out.println("Current best cost : " + bestCost);
+		System.out.println("    kOptimizeRecursive() : Current best cost : " + bestCost);
 		
 		tailSet = prune(headSet, tailSet, bestCost);
-		
-		/*
-		 * Check difference between tailSet and new tailSet for debugging purposes
-		 */
 		
 		if (tailSet == null)
 			return bestCost;
@@ -93,10 +99,14 @@ public class KAnonymizer {
 		Iterator<AttributeGeneralizerIndicesInfo> iterator = tailSet.iterator();
 		while (!tailSet.isEmpty()) {
 			AttributeGeneralizerIndicesInfo p = iterator.next();
-			ArrayList<AttributeGeneralizerIndicesInfo> newHeadSet = new ArrayList<AttributeGeneralizerIndicesInfo>(headSet); newHeadSet.add(p);
+			ArrayList<AttributeGeneralizerIndicesInfo> newHeadSet = new ArrayList<AttributeGeneralizerIndicesInfo>(headSet); 
+			newHeadSet.add(p);
 			iterator.remove();
 			ArrayList<AttributeGeneralizerIndicesInfo> newTailSet = new ArrayList<AttributeGeneralizerIndicesInfo>(tailSet);
 			bestCost = kOptimizeRecursive(newHeadSet, newTailSet, bestCost);
+			tailSet = prune(headSet, newTailSet, bestCost);
+			if (tailSet == null)
+				return bestCost;
 		}
 		return bestCost;
 	}
@@ -158,33 +168,31 @@ public class KAnonymizer {
 	 * @param bestCost
 	 * @return
 	 */
-	private ArrayList<AttributeGeneralizerIndicesInfo> prune(ArrayList<AttributeGeneralizerIndicesInfo> headSet, ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
+	private ArrayList<AttributeGeneralizerIndicesInfo> prune(ArrayList<AttributeGeneralizerIndicesInfo> headSet, 
+			ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
 		ArrayList<AttributeGeneralizerIndicesInfo> allSet = new ArrayList<>(headSet);
-		// ArrayList<Pair> tailSetBackup = new ArrayList(tailSet);
-		
-		// allSet.removeAll(tailSet);
 		allSet.addAll(tailSet);
-		// Collections.sort(allSet); // really necessary?
 		
-		System.out.println("prune() with headSet = " + headSet + ", allSet " + allSet);
+		//System.out.println("prune()\n    headSet = " + headSet + ", allSet " + allSet);
 		
 		Long lowerBound = computeLowerBound(headSet, allSet);
+		//System.out.println("    Computed lowerBound : " + lowerBound);
 		if (lowerBound >= bestCost) {
-			System.out.println("Pruning with\nheadSet " + headSet + "\ntailSet " + tailSet + "\nallSet" + allSet
+			System.out.println("    Pruning with\nheadSet " + headSet + "\ntailSet " + tailSet + "\nallSet" + allSet
 					+ "\nLower bound " + lowerBound + "\nBest cost " + bestCost);
 			return null;
 		}
 		
 		ArrayList<AttributeGeneralizerIndicesInfo> newHeadSet = new ArrayList<>(headSet);
 		ArrayList<AttributeGeneralizerIndicesInfo> newTailSet = new ArrayList<>(tailSet);
-		
+		//System.out.println("    newTailSet = " + newTailSet + ", tailSet = " + tailSet);
 		for (int i = 0; i < tailSet.size(); i++) {
 			newHeadSet.add(tailSet.get(i));
 			//Collections.sort(newHeadSet); // really necessary?
 			
-			AttributeGeneralizerIndicesInfo pairBackup = newTailSet.get(i);
-			newTailSet.remove(i);
-			if (prune(new ArrayList<>(newHeadSet), new ArrayList<>(newTailSet), bestCost) != null) {
+			AttributeGeneralizerIndicesInfo pairBackup = newTailSet.remove(i);
+			
+			if (prune(newHeadSet, newTailSet, bestCost) != null) {
 				newTailSet.add(i, pairBackup);
 			}
 			
@@ -230,7 +238,8 @@ public class KAnonymizer {
 		return dataset.getData();
 	}
 	
-	private Long computeLowerBound(ArrayList<AttributeGeneralizerIndicesInfo> headSet, ArrayList<AttributeGeneralizerIndicesInfo> allSet) {
+	private Long computeLowerBound(ArrayList<AttributeGeneralizerIndicesInfo> headSet,
+			ArrayList<AttributeGeneralizerIndicesInfo> allSet) {
 		// System.out.println("computeLowerBound()...");
 		ArrayList<Tuple> headSetSortedData = sortDataset(headSet);
 		ArrayList<Integer> headSetClassesIndex = dataset.getEquivalenceClassesBoundaries();
@@ -312,7 +321,7 @@ public class KAnonymizer {
 		
 		Long cost = 0l; // Init cost to 0
 		
-		System.out.print(" Equivalence classes sizes : ");
+		System.out.println("    Equivalence classes dimensions : ");
 		for (int i = 0; i < classesIndex.size() - 1; i++) {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
 			System.out.print(diff + "  ");
@@ -326,8 +335,8 @@ public class KAnonymizer {
 				cost += Math.multiplyExact((long) diff, (long) sortedData.size());
 			}
 		}
-		System.out.println("\nEquivalence classes dim : " + (classesIndex.size() - 1));
-		System.out.println("cost = " + cost);
+		System.out.println("\n    Equivalence classes number : " + (classesIndex.size() - 1));
+		System.out.println("    Final cost = " + cost);
 		return cost;
 	}
 	

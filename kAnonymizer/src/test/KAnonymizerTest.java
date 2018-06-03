@@ -83,7 +83,7 @@ class KAnonymizerTest {
 		//System.out.println("Writing to file \"dataset2.csv\"...");
 		//DatasetWriter.writeToFile("dataset2.csv", DatasetWriter.generateCSV(data));
 		
-		String filename = "dataset.csv";
+		String filename = "dataset2.csv";
 		System.out.println("Loading tuples..." );
 		ArrayList<ArrayList<String>> data = DatasetGenerator.generateFromFile(filename);
 		System.out.println("Test set " + filename + " of " + data.size() + " tuples loaded.");
@@ -111,7 +111,7 @@ class KAnonymizerTest {
 			
 			long stopTime = System.currentTimeMillis();
 			
-			System.out.println("Optimal cost : " + bestCost 
+			System.out.println("\nExecution ended.\nOptimal cost : " + bestCost 
 					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
 		}		
 	}

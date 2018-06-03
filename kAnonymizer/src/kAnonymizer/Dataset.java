@@ -25,6 +25,16 @@ import java.util.function.Supplier;
 public class Dataset {
 	
 	private ArrayList<Tuple> data;
+	
+	/*
+	 * Both generalizer, activeGeneralizer are made with the following 
+	 * structure: generalizer is the array of the arrays of all the 
+	 * generalizer for each attribute. In particular, generalizer.get(i) 
+	 * is the array of generalizers for the i-th attribute, and 
+	 * generalizer.get(i).get(j) is the j-th generalizer for the i-th 
+	 * attribute.
+	 */
+	
 	private ArrayList<ArrayList<Generalizer>> generalizer, activeGeneralizer;
 	private TupleComparator tupleComparator;
 	
@@ -93,7 +103,8 @@ public class Dataset {
 	 */
 	public void addActiveGeneralizer(int attributeIndex, int generalizerIndex) {
 		activeGeneralizer.get(attributeIndex).remove(generalizerIndex);
-		activeGeneralizer.get(attributeIndex).add(generalizerIndex, generalizer.get(attributeIndex).get(generalizerIndex));
+		activeGeneralizer.get(attributeIndex).add(generalizerIndex, 
+				generalizer.get(attributeIndex).get(generalizerIndex));
 	}
 	
 	/**
@@ -121,6 +132,11 @@ public class Dataset {
 		return activeGeneralizer;
 	}
 	
+	/**
+	 * This method returns an array that contains the first index of
+	 * each equivalence class of the dataset
+	 * @return
+	 */
 	public ArrayList<Integer> getEquivalenceClassesBoundaries() {
 		//System.out.println("getEquivalenceClassesBoundaries() : Active generalizers " + activeGeneralizer);
 		
