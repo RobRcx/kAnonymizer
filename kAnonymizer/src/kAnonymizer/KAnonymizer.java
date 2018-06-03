@@ -44,7 +44,7 @@ public class KAnonymizer {
 	    	tailSet.add(p);
 	    }
 		
-	    System.out.println("Starting recursion...\n");
+	    //System.out.println("Starting recursion...\n");
 	    
 		return kOptimizeRecursive(headSet, tailSet, Long.MAX_VALUE);
 	}
@@ -65,18 +65,18 @@ public class KAnonymizer {
 		
 		System.out.println("HeadSet : " + headSet + "  TailSet : " + tailSet);
 		
-		//pruneUselessValues(headSet, tailSet);
+		pruneUselessValues(headSet, tailSet);
 		
 		Long nodeAnonymizationCost = computeCost(headSet);
 		
-		if (nodeAnonymizationCost < bestCost)
-			System.out.println("New best cost! " + nodeAnonymizationCost + " < " + bestCost);
+		//if (nodeAnonymizationCost < bestCost)
+		//	System.out.println("New best cost! " + nodeAnonymizationCost + " < " + bestCost);
 		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
-		System.out.println("Current best cost : " + bestCost);
+		//System.out.println("Current best cost : " + bestCost);
 		
-		//tailSet = prune(headSet, tailSet, bestCost);
+		tailSet = prune(headSet, tailSet, bestCost);
 		
 		/*
 		 * Check difference between tailSet and new tailSet for debugging purposes
@@ -117,7 +117,7 @@ public class KAnonymizer {
 				// Sorts the i-th equivalence class basing on (headSet united with p)
 				ArrayList<Tuple> newSortedData = sortDataset(headSet, classesIndex.get(i), classesIndex.get(i + 1));
 				// Gets the new starting indices of equivalence classes within the considered equivalence class
-				ArrayList<Integer> newClassesIndex = dataset.getEquivalenceClassesBoundaries();;
+				ArrayList<Integer> newClassesIndex = dataset.getEquivalenceClassesBoundaries();
 				// If the added generalizer (p) splits the equivalence class
 				if (newClassesIndex.size() > classesIndex.size()) {
 					int j;
@@ -225,6 +225,7 @@ public class KAnonymizer {
 	}
 	
 	private Long computeLowerBound(ArrayList<Pair> headSet, ArrayList<Pair> allSet) {
+		// System.out.println("computeLowerBound()...");
 		ArrayList<Tuple> headSetSortedData = sortDataset(headSet);
 		ArrayList<Integer> headSetClassesIndex = dataset.getEquivalenceClassesBoundaries();
 		
@@ -253,7 +254,7 @@ public class KAnonymizer {
 		for (int i = 0; i < allSetClassesIndex.size() - 1; i++) {
 			int max = Math.max(allSetClassesIndex.get(i + 1) - allSetClassesIndex.get(i), k);
 			
-			for (int j = headSetClassesIndex.get(i); j < headSetClassesIndex.get(i + 1); j++) {
+			for (int j = allSetClassesIndex.get(i); j < allSetClassesIndex.get(i + 1); j++) {
 				if (!map.get(allSetSortedData.get(j))) {
 					lowerBound += max;
 				}
@@ -271,14 +272,17 @@ public class KAnonymizer {
 	
 	private Long computeCost(ArrayList<Pair> headSet) {
 		//assert(headSet.size() != 0);
-
+		//System.out.println("\ncomputeCost:");
+		
 		ArrayList<Tuple> sortedData = sortDataset(headSet); 
 		ArrayList<Integer> classesIndex = dataset.getEquivalenceClassesBoundaries();
 		
 		Long cost = 0l; // Init cost to 0
 		
+		//System.out.print("Equivalence classes sizes : ");
 		for (int i = 0; i < classesIndex.size() - 1; i++) {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
+			//System.out.print(diff + "  ");
 			// If the equivalence class size is greater than k, then:
 			if (diff >= k) {
 				cost += Math.multiplyExact((long) diff, (long) diff);
@@ -287,7 +291,8 @@ public class KAnonymizer {
 				cost += Math.multiplyExact((long) diff, (long) sortedData.size());
 			}
 		}
-		
+		//System.out.println("\nEquivalence classes dim : " + (classesIndex.size() - 1));
+		//System.out.println("cost = " + cost);
 		return cost;
 	}
 	

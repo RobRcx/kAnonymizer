@@ -57,7 +57,7 @@ class KAnonymizerTest {
 
 	@Test
 	void test() throws Exception {
-		int tuples = 2000000;
+		
 		
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
 			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 
@@ -77,26 +77,43 @@ class KAnonymizerTest {
 			})));
 		}};
 		
-		System.out.println("Generating random dataset with " + tuples + " tuples...");
-		
+		//int tuples = 20000;
+		//System.out.println("Generating random dataset with " + tuples + " tuples...");
 		//ArrayList<ArrayList<String>> data = DatasetGenerator.generate(tuples, generalizer);
-		ArrayList<ArrayList<String>> data = DatasetGenerator.generateFromFile("dataset.csv");
+		//System.out.println("Writing to file \"dataset2.csv\"...");
+		//DatasetWriter.writeToFile("dataset2.csv", DatasetWriter.generateCSV(data));
 		
-		//for (ArrayList<String> t : data)
-			//System.out.println(t);
+		String filename = "dataset.csv";
+		System.out.println("Loading tuples..." );
+		ArrayList<ArrayList<String>> data = DatasetGenerator.generateFromFile(filename);
+		System.out.println("Test set " + filename + " of " + data.size() + " tuples loaded.");
+		//for (ArrayList<String> t : data) System.out.println(t);
 		
 		System.out.println("All the generalizers: ");
 		
 		printGeneralizers(generalizer);
 		
+		ArrayList<Integer> kArray = new ArrayList<Integer>
+				//(Arrays.asList(new Integer[] {5000, 2500, 1000, 500, 250, 100, 50, 10, 5, 2}));
+				//(Arrays.asList(new Integer[] {5000, 2500, 1000, 500, 250, 100, 50, 10, 5, 2}));
+				(Arrays.asList(new Integer[] {5}));
 		/*
-		 * Test 0
+		 * Test phase
 		 */
 		
-		int k = 2;
-		
-		KAnonymizer kAnonymizer = new KAnonymizer(k, data, generalizer);
-		kAnonymizer.kOptimize();
+		for (int k : kArray) {
+			System.out.println("k-anonymizing with k = " + k + "...");
+			
+			long startTime = System.currentTimeMillis();
+			
+			KAnonymizer kAnonymizer = new KAnonymizer(k, data, generalizer);
+			Long bestCost = kAnonymizer.kOptimize();
+			
+			long stopTime = System.currentTimeMillis();
+			
+			System.out.println("Optimal cost : " + bestCost 
+					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
+		}		
 	}
 
 	private static void printGeneralizers(ArrayList<ArrayList<Generalizer>> generalizer) {

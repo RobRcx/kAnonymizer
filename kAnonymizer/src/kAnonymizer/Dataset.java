@@ -101,14 +101,14 @@ public class Dataset {
 	 * each attribute in the tuples structure
 	 */
 	public void sort() {
-		System.out.println("Active generalizers before sorting: " + activeGeneralizer);
+		//System.out.println("sort() : Active generalizers before sorting: " + activeGeneralizer);
 		tupleComparator.setActiveGeneralizer(activeGeneralizer);
 		Collections.sort(data, tupleComparator);
 	}
 	
 	public void sort(int start, int end) {
-		System.out.println("Active generalizers before sorting: " + activeGeneralizer
-				+ " from " + start + " to " + end);
+		//System.out.println("Active generalizers before sorting: " + activeGeneralizer
+		//		+ " from " + start + " to " + end);
 		tupleComparator.setActiveGeneralizer(activeGeneralizer);
 		Collections.sort(data.subList(start, end), tupleComparator);
 	}
@@ -122,7 +122,8 @@ public class Dataset {
 	}
 	
 	public ArrayList<Integer> getEquivalenceClassesBoundaries() {
-			
+		//System.out.println("getEquivalenceClassesBoundaries() : Active generalizers " + activeGeneralizer);
+		
 		ArrayList<Integer> index = new ArrayList<Integer>(Arrays.asList(new Integer[] {0}));
 		
 		for (int i = 0; i < data.size() - 1; i++) {
@@ -132,14 +133,14 @@ public class Dataset {
 			}
 		}
 		
-		System.out.println("Indices computed :" + index);
-		
 		/*
 		 *  The following add is performed to take into account
 		 *	the last equivalence class.
 		 */
 		
 		index.add(data.size()); 
+		
+		//System.out.println("Computed indices : " + index);
 		
 		return index;
 	}

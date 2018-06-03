@@ -45,10 +45,9 @@ public class DatasetWriter {
 		System.out.println("Creation succeed.");
 	}
 	
-	public static ArrayList<String> 
-		generateCSV(ArrayList<ArrayList<String>> dataset){
+	public static ArrayList<String> generateCSV(ArrayList<ArrayList<String>> dataset) {
 		ArrayList<String> output = new ArrayList<String>();
-		for(ArrayList<String> row : dataset) {
+		for (ArrayList<String> row : dataset) {
 			StringBuilder csvRow = new StringBuilder();
 			for(String element: row) {
 				csvRow.append(element + ";");
