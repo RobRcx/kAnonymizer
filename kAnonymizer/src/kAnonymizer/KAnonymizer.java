@@ -134,10 +134,10 @@ public class KAnonymizer {
 				// If the added generalizer (p) splits the equivalence class
 				if (newClassesIndex.size() > classesIndex.size()) {
 					int j;
-					for (j = 0; j < newClassesIndex.size(); j++)
+					for (j = 0; j < newClassesIndex.size() - 1; j++)
 						if (newClassesIndex.get(j + 1) - newClassesIndex.get(j) - 1 >= k)
 							break;
-					if (j < newClassesIndex.size())
+					if (j < newClassesIndex.size() - 1)
 						break;
 				}
 			}
@@ -168,7 +168,7 @@ public class KAnonymizer {
 	 * @param bestCost
 	 * @return
 	 */
-	public static int sortCounter = 0;
+	public static long sortCounter = 0l;
 	private ArrayList<AttributeGeneralizerIndicesInfo> prune(ArrayList<AttributeGeneralizerIndicesInfo> headSet, 
 			ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
 		ArrayList<AttributeGeneralizerIndicesInfo> allSet = new ArrayList<>(headSet);
@@ -177,25 +177,36 @@ public class KAnonymizer {
 		//System.out.println("prune()\n    headSet = " + headSet + ", allSet " + allSet);
 		
 		Long lowerBound = computeLowerBound(headSet, allSet);
-		sortCounter += 2;
+		sortCounter += 2l;
 		//System.out.println("    Computed lowerBound : " + lowerBound);
 		if (lowerBound >= bestCost) {
-			System.out.println("    Pruning with\nheadSet " + headSet + "\ntailSet " + tailSet + "\nallSet" + allSet
-					+ "\nLower bound " + lowerBound + "\nBest cost " + bestCost);
+			System.out.println("    Pruning with\n        headSet " + headSet 
+					+ "\n        tailSet " + tailSet 
+					+ "\n        allSet" + allSet
+					+ "\n        Lower bound " + lowerBound 
+					+ "\n        Best cost " + bestCost);
 			return null;
 		}
 		
 		ArrayList<AttributeGeneralizerIndicesInfo> newHeadSet = new ArrayList<>(headSet);
 		ArrayList<AttributeGeneralizerIndicesInfo> newTailSet = new ArrayList<>(tailSet);
-		//System.out.println("    newTailSet = " + newTailSet + ", tailSet = " + tailSet);
+		System.out.println("    newTailSet = " + newTailSet + ", tailSet = " + tailSet);
 		for (int i = 0; i < tailSet.size(); i++) {
 			newHeadSet.add(tailSet.get(i));
-			//Collections.sort(newHeadSet); // really necessary?
 			
-			AttributeGeneralizerIndicesInfo pairBackup = newTailSet.remove(i);
-			
+			AttributeGeneralizerIndicesInfo pairBackup = null;
+			int j = 0;
+			for (j = 0; j < newTailSet.size(); j++) {
+				if (tailSet.get(i).compareTo(newTailSet.get(j)) == 0) {
+					pairBackup = newTailSet.remove(j);
+					break;
+				}
+			}
+
+			if (pairBackup == null)
+				System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH");
 			if (prune(newHeadSet, newTailSet, bestCost) != null) {
-				newTailSet.add(i, pairBackup);
+				newTailSet.add(j, pairBackup);
 			}
 			
 			newHeadSet.remove(newHeadSet.size() - 1);
@@ -323,7 +334,7 @@ public class KAnonymizer {
 		
 		Long cost = 0l; // Init cost to 0
 		
-		System.out.println("    Equivalence classes dimensions : ");
+		System.out.print("    Equivalence classes dimensions : ");
 		for (int i = 0; i < classesIndex.size() - 1; i++) {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
 			System.out.print(diff + "  ");

@@ -77,16 +77,16 @@ class KAnonymizerTest {
 			})));
 		}};
 		
-		//int tuples = 20000;
-		//System.out.println("Generating random dataset with " + tuples + " tuples...");
-		//ArrayList<ArrayList<String>> data = DatasetGenerator.generate(tuples, generalizer);
-		//System.out.println("Writing to file \"dataset2.csv\"...");
-		//DatasetWriter.writeToFile("dataset2.csv", DatasetWriter.generateCSV(data));
+		int tuples = 3500;
+		System.out.println("Generating random dataset with " + tuples + " tuples...");
+		ArrayList<ArrayList<String>> data = DatasetGenerator.generate(tuples, generalizer);
+		System.out.println("Writing to file \"dataset3.csv\"...");
+	    DatasetWriter.writeToFile("dataset3.csv", DatasetWriter.generateCSV(data));
 		
-		String filename = "dataset2.csv";
+		/*String filename = "dataset2.csv";
 		System.out.println("Loading tuples..." );
 		ArrayList<ArrayList<String>> data = DatasetGenerator.generateFromFile(filename);
-		System.out.println("Test set " + filename + " of " + data.size() + " tuples loaded.");
+		System.out.println("Test set " + filename + " of " + data.size() + " tuples loaded.");*/
 		//for (ArrayList<String> t : data) System.out.println(t);
 		
 		System.out.println("All the generalizers: ");
@@ -96,7 +96,7 @@ class KAnonymizerTest {
 		ArrayList<Integer> kArray = new ArrayList<Integer>
 				//(Arrays.asList(new Integer[] {5000, 2500, 1000, 500, 250, 100, 50, 10, 5, 2}));
 				//(Arrays.asList(new Integer[] {5000, 2500, 1000, 500, 250, 100, 50, 10, 5, 2}));
-				(Arrays.asList(new Integer[] {5}));
+				(Arrays.asList(new Integer[] {800}));
 		/*
 		 * Test phase
 		 */

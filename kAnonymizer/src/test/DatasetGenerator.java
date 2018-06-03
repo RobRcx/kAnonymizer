@@ -43,7 +43,6 @@ public class DatasetGenerator {
 		return dataset;
 	}
 	
-	// to be finished
 	public static ArrayList<ArrayList<String>> generateFromFile(String filename) throws Exception{
 		ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
 		Files.lines(Paths.get(filename)).forEach(item->output.add(parseRow(item)));
