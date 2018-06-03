@@ -83,7 +83,7 @@ class KAnonymizerTest {
 		//System.out.println("Writing to file \"dataset2.csv\"...");
 		//DatasetWriter.writeToFile("dataset2.csv", DatasetWriter.generateCSV(data));
 		
-		String filename = "dataset2.csv";
+		String filename = "dataset.csv";
 		System.out.println("Loading tuples..." );
 		ArrayList<ArrayList<String>> data = DatasetGenerator.generateFromFile(filename);
 		System.out.println("Test set " + filename + " of " + data.size() + " tuples loaded.");
