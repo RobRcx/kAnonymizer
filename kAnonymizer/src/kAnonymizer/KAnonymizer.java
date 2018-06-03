@@ -2,8 +2,11 @@ package kAnonymizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class KAnonymizer {
 	
@@ -74,9 +77,9 @@ public class KAnonymizer {
 		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
-		//System.out.println("Current best cost : " + bestCost);
+		System.out.println("Current best cost : " + bestCost);
 		
-		tailSet = prune(headSet, tailSet, bestCost);
+		// tailSet = prune(headSet, tailSet, bestCost);
 		
 		/*
 		 * Check difference between tailSet and new tailSet for debugging purposes
@@ -85,7 +88,7 @@ public class KAnonymizer {
 		if (tailSet == null)
 			return bestCost;
 		
-		// reorderTail(headSet, tailSet);
+		tailSet = reorderTail(headSet, tailSet);
 		
 		Iterator<Pair> iterator = tailSet.iterator();
 		while (!tailSet.isEmpty()) {
@@ -266,33 +269,69 @@ public class KAnonymizer {
 		return lowerBound;
 	}
 	
-	private void reorderTail(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
-		// TODO
+	private ArrayList<Pair> reorderTail(ArrayList<Pair> headSet, ArrayList<Pair> tailSet) {
+		System.out.print("reorderTail() : ");
+		
+		ArrayList<Pair> newTailSet = new ArrayList<>(tailSet);
+		
+		HashMap<Integer, Integer> map= new HashMap<>(); // <associated cost, index in tailSet>
+		for (int i = 0; i < tailSet.size(); i++) {
+			headSet.add(tailSet.get(i));
+			
+			ArrayList<Tuple> sortedData = sortDataset(headSet);
+			
+			map.put(dataset.getEquivalenceClassesBoundaries().size(), i);
+			
+			headSet.remove(headSet.size() - 1);
+		}
+		
+		List<Integer> keys = new ArrayList<>(map.keySet());
+		
+		Collections.sort(keys);
+		
+		Iterator<Entry<Integer, Integer>> it = map.entrySet().iterator();
+	    while (it.hasNext()) {
+	    	Entry<Integer, Integer> pair = it.next();
+	        System.out.print("("+ pair.getKey() + ", " + pair.getValue() + ")  ");
+	        
+	        int dim = pair.getKey(), index = pair.getValue();
+	        
+	        newTailSet.remove(index);
+	        newTailSet.add(index, tailSet.get(index));
+	        
+	        //it.remove(); // avoids a ConcurrentModificationException
+	    }
+	    
+	    System.out.println("");
+		
+		return newTailSet;
 	}
 	
 	private Long computeCost(ArrayList<Pair> headSet) {
 		//assert(headSet.size() != 0);
-		//System.out.println("\ncomputeCost:");
+		System.out.println("\ncomputeCost:");
 		
 		ArrayList<Tuple> sortedData = sortDataset(headSet); 
 		ArrayList<Integer> classesIndex = dataset.getEquivalenceClassesBoundaries();
 		
 		Long cost = 0l; // Init cost to 0
 		
-		//System.out.print("Equivalence classes sizes : ");
+		System.out.print("k = " + k + ", Equivalence classes sizes : ");
 		for (int i = 0; i < classesIndex.size() - 1; i++) {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
-			//System.out.print(diff + "  ");
+			System.out.print(diff + "  ");
 			// If the equivalence class size is greater than k, then:
 			if (diff >= k) {
+				//System.out.println(" =>(1)  " + Math.multiplyExact((long) diff, (long) diff) + "  ");
 				cost += Math.multiplyExact((long) diff, (long) diff);
 			}
 			else { // otherwise it is a suppressed group of tuples, hence the cost addition:
+				//System.out.println(" =>(2)  " + Math.multiplyExact((long) diff, (long) sortedData.size()) + "  ");
 				cost += Math.multiplyExact((long) diff, (long) sortedData.size());
 			}
 		}
-		//System.out.println("\nEquivalence classes dim : " + (classesIndex.size() - 1));
-		//System.out.println("cost = " + cost);
+		System.out.println("\nEquivalence classes dim : " + (classesIndex.size() - 1));
+		System.out.println("cost = " + cost);
 		return cost;
 	}
 	
