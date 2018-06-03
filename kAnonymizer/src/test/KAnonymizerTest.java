@@ -113,6 +113,8 @@ class KAnonymizerTest {
 			
 			System.out.println("\nExecution ended.\nOptimal cost : " + bestCost 
 					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
+			
+			System.out.println("sortCounter: " + KAnonymizer.sortCounter);
 		}		
 	}
 
