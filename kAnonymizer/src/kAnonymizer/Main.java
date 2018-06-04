@@ -1,5 +1,6 @@
 package kAnonymizer;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,39 +21,61 @@ import java.util.List;
 public class Main {
 
 	public static void main(String[] args) {
-		if (args.length < 3) {
-			System.out.println("Usage: kAnonymizer <k> <dataset> <generalizers>");
+		if (args.length < 5) {
+			System.out.println("Usage: kAnonymizer <kStart> <kEnd> <kStep> <dataset> <generalizers>");
 			System.exit(-1);
 		}
 		
-		Integer k = null;
+		Integer kStart, kEnd, kStep;
+		kStart = kEnd = kStep = null;
+		ArrayList<ArrayList<String>> dataset = null;
+		
+		/*
+		 * Parsing k and opening the dataset
+		 */
+		
 		try {
-			k = Integer.parseInt(args[0]);
+			kStart = Integer.parseInt(args[0]);
+			kEnd = Integer.parseInt(args[1]);
+			kStep = Integer.parseInt(args[2]);
+			
+			if (kStart < 1 || kEnd < 1 || kStep < 0) {
+				throw new Exception("Error: The following must hold:"
+						+ "kStart < 1, kEnd < 1, kStep < 0.\nQuitting.");
+			}
+			
+			if (kStart < kEnd) {
+				Integer tmp = kStart;
+				kStart = kEnd;
+				kEnd = tmp;
+			}
+			
+			System.out.println("Loading tuples..." );
+			dataset = readDataset(args[3]);
 		} catch (NumberFormatException e) {
 			System.out.println("Numeric value for k required.");
 			System.exit(-2);
-		}
-		
-		// TODO: read dataset into generic ArrayLists, and then 
-		// parse values type in KAnonymizer.java
-		String datasetPath = args[1];
-		ArrayList<ArrayList<String>> dataset = null;
-		try {
-			dataset = readDataset(datasetPath);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			System.out.println("Error opening " + datasetPath);
+		} catch (IOException e) {
+			System.out.println("Error opening dataset path specified by " + args[1]);
+			System.exit(-3);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			System.exit(-2);
+		} finally {
+			System.out.println("k0 = " + kStart + " kFinal = " + kEnd + " kStep = " + kStep);
+			System.out.println("Test set " + args[3] + " of " + dataset.size() + " tuples loaded.");
 		}
 		
-		String generalizersPath = args[2];
+		/*
+		 * Opening and parsing the generalizers file
+		 */
+		
 		ArrayList<ArrayList<Generalizer>> generalizer = null;
 		try {
-			generalizer = readGeneralizers(generalizersPath);
+			generalizer = readGeneralizers(args[4]);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("Error opening " + generalizersPath);
-			System.exit(-2);
+			System.out.println("Error opening " + args[4]);
+			System.exit(-4);
 		} finally {
 			System.out.println("Generalizers found: ");
 			for (ArrayList<Generalizer> generalizerArray : generalizer) {
@@ -63,44 +86,44 @@ public class Main {
 			}
 		}
 		
-		// TODO: read generalizations from file
+		/*
+		 * Performs the k-anonymization over the values of k as specified by 
+		 * the input interval.
+		 */
+		assert (kStart > kEnd);
+	
+		KAnonymizer kAnonymizer = new KAnonymizer(kStart, dataset, generalizer);
 		
-		/*ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<ArrayList<Generalizer>>() {{
-			add( new ArrayList<Generalizer>(Arrays.asList(new NumericGeneralizer[] { 
-					new NumericGeneralizer("1", 10, 29), new NumericGeneralizer("2", 30, 39),
-					new NumericGeneralizer("3", 40, 49)
-			})));
-			add( new ArrayList<Generalizer>(Arrays.asList(new CategoricGeneralizer[] { 
-					new CategoricGeneralizer("4", "M"), new CategoricGeneralizer("5", "F")
-			})));
-			add( new ArrayList<Generalizer>(Arrays.asList(new CategoricGeneralizer[] { 
-					new CategoricGeneralizer("6", "Married"), new CategoricGeneralizer("7", "Widowed"),
-					new CategoricGeneralizer("8", "Divorced"), new CategoricGeneralizer("9", "Never Married")
-			})));
-		}};*/
-		
-		KAnonymizer kAnonymizer = new KAnonymizer(k, dataset, generalizer);
-		
-		long startTime = System.currentTimeMillis();
-		
-		Long bestCost = kAnonymizer.kOptimize();
-		
-		long stopTime = System.currentTimeMillis();
-		
-		System.out.println("\nExecution ended.\nOptimal cost : " + bestCost 
-				+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
-		
-		System.out.println("sortCounter: " + KAnonymizer.sortCounter);
+		while (kStart > kEnd) {
+			if (kStart - kStep < kEnd)
+				kStart = kEnd;
+			else
+				kStart = kStart - kStep;
+			
+			kAnonymizer.setK(kStart);
+			System.out.println("k-anonymizing with k = " + kStart + "...");
+			
+			long startTime = System.currentTimeMillis();
+			
+			Long bestCost = kAnonymizer.kOptimize();
+			
+			long stopTime = System.currentTimeMillis();
+			
+			System.out.println("\nExecution ended.\nOptimal cost : " + bestCost 
+					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
+			
+			System.out.println("sortCounter: " + KAnonymizer.sortCounter);
+		}
 	}
 	
 	
-	public static ArrayList<ArrayList<String>> readDataset(String filename) throws Exception{
+	private static ArrayList<ArrayList<String>> readDataset(String filename) throws IOException {
 		ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
 		Files.lines(Paths.get(filename)).forEach(item->output.add(parseDatasetRow(item)));
 		return output;
 	}
 	
-	private static ArrayList<String> parseDatasetRow(String rawRow){
+	private static ArrayList<String> parseDatasetRow(String rawRow) {
 		ArrayList<String> row = new ArrayList<String>();
 		int firstSeparator = rawRow.indexOf(';', 0);
 		int secondSeparator = rawRow.indexOf(';', firstSeparator + 1);
@@ -110,14 +133,14 @@ public class Main {
 		return row;
 	}
 	
-	public static ArrayList<ArrayList<Generalizer>> readGeneralizers(String filename) throws Exception{
+	private static ArrayList<ArrayList<Generalizer>> readGeneralizers(String filename) throws IOException  {
 		ArrayList<ArrayList<Generalizer>> generalizer = new ArrayList<>();
 		IntegerWrapper count = new IntegerWrapper(0);
 		Files.lines(Paths.get(filename)).forEach(item->generalizer.add(parseGeneralizerRow(count, item)));
 		return generalizer;
 	}
 	
-	private static ArrayList<Generalizer> parseGeneralizerRow(IntegerWrapper count, String rawRow){
+	private static ArrayList<Generalizer> parseGeneralizerRow(IntegerWrapper count, String rawRow) {
 		ArrayList<Generalizer> row = new ArrayList<>();
 		String[] res = rawRow.split("\\s+");
 		if (res[0].equals("Numeric") ) {
@@ -137,8 +160,7 @@ public class Main {
 		return row;
 	}
 
-	protected static class IntegerWrapper{
-		
+	protected static class IntegerWrapper {
 		private Integer value;
 
 		public IntegerWrapper(int value) {
@@ -156,8 +178,6 @@ public class Main {
 		public void setValue(Integer value) {
 			this.value = value;
 		}
-		
 	}
-	
 }
 

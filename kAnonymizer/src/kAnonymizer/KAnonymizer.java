@@ -13,9 +13,11 @@ public class KAnonymizer {
 	private int k;
 	private Dataset dataset;
 	private ArrayList<AttributeGeneralizerIndicesInfo> generalizerIndices;
+	private int nodeCounter;
 	
-	public KAnonymizer(int k, 
-					   ArrayList<ArrayList<String>> dataset,
+	private static final boolean debug = true;
+	
+	public KAnonymizer(int k, ArrayList<ArrayList<String>> dataset,
 					   ArrayList<ArrayList<Generalizer>> generalizer) {
 		this.k = k;
 		this.dataset = new Dataset(dataset, generalizer);
@@ -34,6 +36,8 @@ public class KAnonymizer {
 						.get(i).get(j).getId(), i, j));
 			}
 		}
+		
+		nodeCounter = 0;
 	}
 	
 	public void setK(int k) {
@@ -52,6 +56,7 @@ public class KAnonymizer {
 		
 	    //System.out.println("Starting recursion...\n");
 	    
+	    nodeCounter = 0;
 		return kOptimizeRecursive(headSet, tailSet, Long.MAX_VALUE);
 	}
 	
@@ -64,14 +69,16 @@ public class KAnonymizer {
 	 * @param bestCost
 	 * @return
 	 */
-	private static int c = 0;
+	
 	private Long kOptimizeRecursive(ArrayList<AttributeGeneralizerIndicesInfo> headSet,
 			ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
-		c++;
-		System.out.println("\n********************** Node " + c + " ****************************");
+		nodeCounter++;
 		
-		System.out.println("kOptimizeRecursive()\n    HeadSet : " + headSet + "  TailSet : " + tailSet);
+		if (debug) {
+			System.out.println("\n********************** Node " + nodeCounter + " ****************************");
 		
+			System.out.println("kOptimizeRecursive()\n    HeadSet : " + headSet + "  TailSet : " + tailSet);
+		}
 		pruneUselessValues(headSet, tailSet);
 		
 		/*
@@ -82,12 +89,14 @@ public class KAnonymizer {
 		
 		Long nodeAnonymizationCost = computeCost(headSet);
 		
+		
+		System.out.println("    Best cost before computing the new cost of the node : " + bestCost);
 		if (nodeAnonymizationCost < bestCost)
 			System.out.println("    New best cost! " + nodeAnonymizationCost + " < " + bestCost);
 		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
-		System.out.println("    kOptimizeRecursive() : Current best cost : " + bestCost);
+		
 		
 		tailSet = prune(headSet, tailSet, bestCost);
 		
@@ -353,7 +362,8 @@ public class KAnonymizer {
 		return cost;
 	}
 	
-	protected class AttributeGeneralizerIndicesInfo implements Comparable<AttributeGeneralizerIndicesInfo> {
+	protected class AttributeGeneralizerIndicesInfo 
+	implements Comparable<AttributeGeneralizerIndicesInfo> {
 		private String id;
 		private int attributeIndex, generalizerIndex;
 
