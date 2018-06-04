@@ -98,8 +98,8 @@ public class Main {
 		
 		while (kStart >= kEnd) {		
 			kAnonymizer.setK(kStart);
-			System.out.println("k-anonymizing with k = " + kStart + "...");
-			
+			System.out.println("**** k-anonymizing with k = " + kStart + " ***\nProcessing...");
+
 			long startTime = System.currentTimeMillis();
 			
 			Long bestCost = kAnonymizer.kOptimize();
@@ -107,7 +107,7 @@ public class Main {
 			long stopTime = System.currentTimeMillis();
 			
 			System.out.println("Execution ended.\nOptimal cost : " + bestCost 
-					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
+					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.\n");
 			
 			// System.out.println("sortCounter: " + KAnonymizer.sortCounter);
 			

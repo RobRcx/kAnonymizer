@@ -17,6 +17,7 @@ public class KAnonymizer {
 	
 	private static final boolean debug = false;
 	private static final boolean verbose = false;
+	private static final boolean pruning = true;
 	
 	public KAnonymizer(int k, ArrayList<ArrayList<String>> dataset,
 					   ArrayList<ArrayList<Generalizer>> generalizer) {
@@ -39,6 +40,12 @@ public class KAnonymizer {
 		}
 		
 		nodeCounter = 0;
+		
+		if (!pruning) {
+    		System.out.println("kOptimize() :\n    No pruning activated for this k-optimizer.");
+    	}
+    	else
+    		System.out.println("kOptimize() :\n    Pruning activated for this k-optimizer.");
 	}
 	
 	public void setK(int k) {
@@ -58,6 +65,7 @@ public class KAnonymizer {
 	    //System.out.println("Starting recursion...\n");
 	    
 	    nodeCounter = 0;
+	    
 		return kOptimizeRecursive(headSet, tailSet, Long.MAX_VALUE);
 	}
 	
@@ -78,9 +86,12 @@ public class KAnonymizer {
 		if (debug) {
 			System.out.println("\n********************** Node " + nodeCounter + " ****************************");
 		
-			System.out.println("kOptimizeRecursive()\n    HeadSet : " + headSet + "  TailSet : " + tailSet);
+			System.out.println("kOptimizeRecursive() :\n    HeadSet : " + headSet + "  TailSet : " + tailSet);
 		}
-		pruneUselessValues(headSet, tailSet);
+		
+		if (pruning) {
+			pruneUselessValues(headSet, tailSet);
+		}
 		
 		/*
 		 * The "Long" usage takes into account the fact that 
@@ -91,19 +102,21 @@ public class KAnonymizer {
 		Long nodeAnonymizationCost = computeCost(headSet);
 		
 		if (debug) {
-			System.out.println("    Best cost before computing the new cost of the node : " + bestCost);
+			System.out.println("kOptimizeRecursive() :\n    Best cost before computing the new cost of the node : " + bestCost);
 			if (nodeAnonymizationCost < bestCost)
 				System.out.println("    New best cost! " + nodeAnonymizationCost + " < " + bestCost);
 		}
 		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
 		
-		tailSet = prune(headSet, tailSet, bestCost);
-		
-		if (tailSet == null)
-			return bestCost;
-		
-		tailSet = reorderTail(headSet, tailSet);
+		if (pruning) {
+			tailSet = prune(headSet, tailSet, bestCost);
+			
+			if (tailSet == null)
+				return bestCost;
+			
+			tailSet = reorderTail(headSet, tailSet);
+		}
 		
 		Iterator<AttributeGeneralizerIndicesInfo> iterator = tailSet.iterator();
 		while (!tailSet.isEmpty()) {
@@ -113,9 +126,11 @@ public class KAnonymizer {
 			iterator.remove();
 			ArrayList<AttributeGeneralizerIndicesInfo> newTailSet = new ArrayList<AttributeGeneralizerIndicesInfo>(tailSet);
 			bestCost = kOptimizeRecursive(newHeadSet, newTailSet, bestCost);
-			tailSet = prune(headSet, newTailSet, bestCost);
-			if (tailSet == null)
-				return bestCost;
+			if (pruning) {
+				tailSet = prune(headSet, newTailSet, bestCost);
+				if (tailSet == null)
+					return bestCost;
+			}
 		}
 		return bestCost;
 	}
