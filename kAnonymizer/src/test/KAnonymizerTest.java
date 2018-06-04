@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import kAnonymizer.AnonymizationResult;
 import kAnonymizer.CategoricGeneralizer;
 import kAnonymizer.Dataset;
 import kAnonymizer.Generalizer;
@@ -101,18 +102,15 @@ class KAnonymizerTest {
 		 * Test phase
 		 */
 		
+		KAnonymizer kAnonymizer = new KAnonymizer(2, data, generalizer);
+		
 		for (int k : kArray) {
 			System.out.println("k-anonymizing with k = " + k + "...");
 			
-			long startTime = System.currentTimeMillis();
-			
-			KAnonymizer kAnonymizer = new KAnonymizer(k, data, generalizer);
-			Long bestCost = kAnonymizer.kOptimize();
-			
-			long stopTime = System.currentTimeMillis();
-			
-			System.out.println("\nExecution ended.\nOptimal cost : " + bestCost 
-					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
+			kAnonymizer.setK(k);
+			AnonymizationResult result = kAnonymizer.kOptimize();
+
+			System.out.println(result.prettyPrintableString());	
 			
 			System.out.println("sortCounter: " + KAnonymizer.sortCounter);
 		}		

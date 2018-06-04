@@ -90,6 +90,18 @@ public class Dataset {
 		}
 	}*/
 	
+	public int getNumberOfGeneralizers() {
+		int res = 0;
+		
+		for (int i = 0; i < generalizer.size(); i++) {
+			for (int j = 0; j < generalizer.get(i).size(); j++) {
+				res++;
+			}
+		}
+		
+		return res;
+	}
+	
 	public void addActiveGeneralizer(ArrayList<ArrayList<Generalizer>> newGeneralizer) {
 		activeGeneralizer = new ArrayList<ArrayList<Generalizer>>(newGeneralizer);
 	}
