@@ -294,6 +294,8 @@ public class Dataset {
 								}
 							} catch (Exception ex) {
 								System.out.println("Error comparing tuples.");
+								System.out.println(t0.data.get(i));
+								System.exit(-1);
 								return 1;
 							}
 							

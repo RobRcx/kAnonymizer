@@ -64,6 +64,9 @@ public class Main {
 		} finally {
 			System.out.println("k0 = " + kStart + " kFinal = " + kEnd + " kStep = " + kStep);
 			System.out.println("Test set " + args[3] + " of " + dataset.size() + " tuples loaded.");
+			System.out.println(dataset.get(0));
+			System.out.println(dataset.get(1));
+			System.out.println(dataset.get(2));
 		}
 		
 		/*
@@ -122,12 +125,11 @@ public class Main {
 	}
 	
 	private static ArrayList<String> parseDatasetRow(String rawRow) {
+		String[] res = rawRow.split(";");
 		ArrayList<String> row = new ArrayList<String>();
-		int firstSeparator = rawRow.indexOf(';', 0);
-		int secondSeparator = rawRow.indexOf(';', firstSeparator + 1);
-		row.add(rawRow.substring(0, firstSeparator));
-		row.add(rawRow.substring(firstSeparator + 1, secondSeparator));
-		row.add(rawRow.substring(secondSeparator + 1));
+		for(int i = 0; i < res.length; i++) {
+			row.add(res[i]);
+		}
 		return row;
 	}
 	
