@@ -38,6 +38,8 @@ public class Dataset {
 	private ArrayList<ArrayList<Generalizer>> generalizer, activeGeneralizer;
 	private TupleComparator tupleComparator;
 	
+	private static final boolean debug = true;
+	
 	public Dataset(ArrayList<ArrayList<String>> data, 
 			ArrayList<ArrayList<Generalizer>> generalizer) {
 		
@@ -89,7 +91,7 @@ public class Dataset {
 	}*/
 	
 	public void addActiveGeneralizer(ArrayList<ArrayList<Generalizer>> newGeneralizer) {
-		activeGeneralizer = (ArrayList<ArrayList<Generalizer>>) newGeneralizer.clone();
+		activeGeneralizer = new ArrayList<ArrayList<Generalizer>>(newGeneralizer);
 	}
 	
 	public void resetActiveGeneralizer(int attributeIndex, int generalizerIndex) {
@@ -134,7 +136,7 @@ public class Dataset {
 	
 	/**
 	 * This method returns an array that contains the first index of
-	 * each equivalence class of the dataset
+	 * each equivalence class of the dataset.
 	 * @return
 	 */
 	public ArrayList<Integer> getEquivalenceClassesBoundaries() {

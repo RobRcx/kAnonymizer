@@ -15,7 +15,8 @@ public class KAnonymizer {
 	private ArrayList<AttributeGeneralizerIndicesInfo> generalizerIndices;
 	private int nodeCounter;
 	
-	private static final boolean debug = true;
+	private static final boolean debug = false;
+	private static final boolean verbose = false;
 	
 	public KAnonymizer(int k, ArrayList<ArrayList<String>> dataset,
 					   ArrayList<ArrayList<Generalizer>> generalizer) {
@@ -89,14 +90,13 @@ public class KAnonymizer {
 		
 		Long nodeAnonymizationCost = computeCost(headSet);
 		
-		
-		System.out.println("    Best cost before computing the new cost of the node : " + bestCost);
-		if (nodeAnonymizationCost < bestCost)
-			System.out.println("    New best cost! " + nodeAnonymizationCost + " < " + bestCost);
+		if (debug) {
+			System.out.println("    Best cost before computing the new cost of the node : " + bestCost);
+			if (nodeAnonymizationCost < bestCost)
+				System.out.println("    New best cost! " + nodeAnonymizationCost + " < " + bestCost);
+		}
 		
 		bestCost = nodeAnonymizationCost < bestCost ? nodeAnonymizationCost : bestCost;
-		
-		
 		
 		tailSet = prune(headSet, tailSet, bestCost);
 		
@@ -122,7 +122,7 @@ public class KAnonymizer {
 	
 	
 	private void pruneUselessValues(ArrayList<AttributeGeneralizerIndicesInfo> headSet, ArrayList<AttributeGeneralizerIndicesInfo> tailSet) {
-		ArrayList<Tuple> sortedData = sortDataset(headSet);
+		sortDataset(headSet);
 		ArrayList<Integer> classesIndex = dataset.getEquivalenceClassesBoundaries();
 		
 		// TO CHECK!
@@ -137,7 +137,7 @@ public class KAnonymizer {
 			int i;
 			for (i = 0; i < classesIndex.size() - 1; i++) {
 				// Sorts the i-th equivalence class basing on (headSet united with p)
-				ArrayList<Tuple> newSortedData = sortDataset(headSet, classesIndex.get(i), classesIndex.get(i + 1));
+				sortDataset(headSet, classesIndex.get(i), classesIndex.get(i + 1));
 				// Gets the new starting indices of equivalence classes within the considered equivalence class
 				ArrayList<Integer> newClassesIndex = dataset.getEquivalenceClassesBoundaries();
 				// If the added generalizer (p) splits the equivalence class
@@ -177,7 +177,10 @@ public class KAnonymizer {
 	 * @param bestCost
 	 * @return
 	 */
+	
+	
 	public static long sortCounter = 0l;
+	
 	private ArrayList<AttributeGeneralizerIndicesInfo> prune(ArrayList<AttributeGeneralizerIndicesInfo> headSet, 
 			ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
 		ArrayList<AttributeGeneralizerIndicesInfo> allSet = new ArrayList<>(headSet);
@@ -186,20 +189,29 @@ public class KAnonymizer {
 		//System.out.println("prune()\n    headSet = " + headSet + ", allSet " + allSet);
 		
 		Long lowerBound = computeLowerBound(headSet, allSet);
-		sortCounter += 2l;
+		
+		if (debug) 
+			sortCounter += 2l;
+		
 		//System.out.println("    Computed lowerBound : " + lowerBound);
 		if (lowerBound >= bestCost) {
-			System.out.println("    Pruning with\n        headSet " + headSet 
-					+ "\n        tailSet " + tailSet 
-					+ "\n        allSet" + allSet
-					+ "\n        Lower bound " + lowerBound 
-					+ "\n        Best cost " + bestCost);
+			if (debug && verbose) {
+				System.out.println("    Pruning with\n        headSet " + headSet 
+						+ "\n        tailSet " + tailSet 
+						+ "\n        allSet" + allSet
+						+ "\n        Lower bound " + lowerBound 
+						+ "\n        Best cost " + bestCost);
+			}
 			return null;
 		}
 		
 		ArrayList<AttributeGeneralizerIndicesInfo> newHeadSet = new ArrayList<>(headSet);
 		ArrayList<AttributeGeneralizerIndicesInfo> newTailSet = new ArrayList<>(tailSet);
-		System.out.println("    newTailSet = " + newTailSet + ", tailSet = " + tailSet);
+		
+		if (debug && verbose) {
+			System.out.println("    newTailSet = " + newTailSet + ", tailSet = " + tailSet);
+		}
+		
 		for (int i = 0; i < tailSet.size(); i++) {
 			newHeadSet.add(tailSet.get(i));
 			
@@ -211,9 +223,7 @@ public class KAnonymizer {
 					break;
 				}
 			}
-
-			if (pairBackup == null)
-				System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH");
+			
 			if (prune(newHeadSet, newTailSet, bestCost) != null) {
 				newTailSet.add(j, pairBackup);
 			}
@@ -303,8 +313,11 @@ public class KAnonymizer {
 		return lowerBound;
 	}
 	
-	private ArrayList<AttributeGeneralizerIndicesInfo> reorderTail(ArrayList<AttributeGeneralizerIndicesInfo> headSet, ArrayList<AttributeGeneralizerIndicesInfo> tailSet) {
-		System.out.print("reorderTail() : ");
+	private ArrayList<AttributeGeneralizerIndicesInfo> reorderTail(ArrayList<AttributeGeneralizerIndicesInfo> headSet, 
+											ArrayList<AttributeGeneralizerIndicesInfo> tailSet) {
+		if (debug) {
+			System.out.print("reorderTail() : ");
+		}
 		
 		ArrayList<AttributeGeneralizerIndicesInfo> newTailSet = new ArrayList<>();
 		
@@ -313,7 +326,7 @@ public class KAnonymizer {
 		for (int i = 0; i < tailSet.size(); i++) {
 			headSet.add(tailSet.get(i));
 			
-			ArrayList<Tuple> sortedData = sortDataset(headSet);
+			sortDataset(headSet);
 			equivalenceClassesArray.add(new Pair(i, dataset.getEquivalenceClassesBoundaries().size()));
 			
 			headSet.remove(headSet.size() - 1);
@@ -326,39 +339,54 @@ public class KAnonymizer {
 			int value = equivalenceClassesArray.get(i).getValue();
 		
 			newTailSet.add(tailSet.get(key));
-			System.out.print("(" + key + ", " + value + ")  ");
+			
+			if (debug) {
+				System.out.print("(" + key + ", " + value + ")  ");
+			}
 		}
 	    
-	    System.out.println("");
+		if (debug) {
+			System.out.println("");
+		}
 		
 		return newTailSet;
 	}
 	
 	private Long computeCost(ArrayList<AttributeGeneralizerIndicesInfo> headSet) {
-		//assert(headSet.size() != 0);
-		System.out.println("computeCost() : ");
+		assert(headSet.size() != 0);
+		
+		if (debug) {
+			System.out.println("computeCost() : ");
+		}
 		
 		ArrayList<Tuple> sortedData = sortDataset(headSet); 
 		ArrayList<Integer> classesIndex = dataset.getEquivalenceClassesBoundaries();
 		
-		Long cost = 0l; // Init cost to 0
+		Long cost = 0l;
 		
-		System.out.print("    Equivalence classes dimensions : ");
+		if (debug) {
+			System.out.print("    Equivalence classes dimensions : ");
+		}
+		
 		for (int i = 0; i < classesIndex.size() - 1; i++) {
 			int diff = classesIndex.get(i + 1) - classesIndex.get(i);
-			System.out.print(diff + "  ");
+			if (debug) {	
+				System.out.print(diff + "  ");
+			}
 			// If the equivalence class size is greater than k, then:
 			if (diff >= k) {
-				//System.out.println(" =>(1)  " + Math.multiplyExact((long) diff, (long) diff) + "  ");
 				cost += Math.multiplyExact((long) diff, (long) diff);
 			}
 			else { // otherwise it is a suppressed group of tuples, hence the cost addition:
-				//System.out.println(" =>(2)  " + Math.multiplyExact((long) diff, (long) sortedData.size()) + "  ");
 				cost += Math.multiplyExact((long) diff, (long) sortedData.size());
 			}
 		}
-		System.out.println("\n    Equivalence classes number : " + (classesIndex.size() - 1));
-		System.out.println("    Final cost = " + cost);
+		
+		if (debug) {
+			System.out.println("\n    Equivalence classes number : " + (classesIndex.size() - 1));
+			System.out.println("    Final cost = " + cost);
+		}
+		
 		return cost;
 	}
 	

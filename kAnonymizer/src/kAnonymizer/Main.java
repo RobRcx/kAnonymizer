@@ -94,12 +94,9 @@ public class Main {
 	
 		KAnonymizer kAnonymizer = new KAnonymizer(kStart, dataset, generalizer);
 		
-		while (kStart > kEnd) {
-			if (kStart - kStep < kEnd)
-				kStart = kEnd;
-			else
-				kStart = kStart - kStep;
-			
+		System.out.println("\n\n************ Starting k-anonymization! *************");
+		
+		while (kStart >= kEnd) {		
 			kAnonymizer.setK(kStart);
 			System.out.println("k-anonymizing with k = " + kStart + "...");
 			
@@ -109,10 +106,15 @@ public class Main {
 			
 			long stopTime = System.currentTimeMillis();
 			
-			System.out.println("\nExecution ended.\nOptimal cost : " + bestCost 
+			System.out.println("Execution ended.\nOptimal cost : " + bestCost 
 					+ " obtained in " + ((stopTime - startTime) / 1000d) + " sec.");
 			
-			System.out.println("sortCounter: " + KAnonymizer.sortCounter);
+			// System.out.println("sortCounter: " + KAnonymizer.sortCounter);
+			
+			if (kStart - kStep < kEnd && kStart > kEnd )
+				kStart = kEnd;
+			else
+				kStart = kStart - kStep;
 		}
 	}
 	
