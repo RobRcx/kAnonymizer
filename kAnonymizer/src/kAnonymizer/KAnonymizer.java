@@ -14,10 +14,9 @@ public class KAnonymizer {
 	private Dataset dataset;
 	private ArrayList<AttributeGeneralizerIndicesInfo> generalizerIndices;
 	private int nodeCounter;
-	private int numberOfGeneralizers;
 	private AnonymizationResult anonymizationResult;
 	
-	private static final boolean debug = false;
+	private static final boolean debug = true;
 	private static final boolean verbose = false;
 	private static final boolean pruning = true;
 	
@@ -25,8 +24,6 @@ public class KAnonymizer {
 					   ArrayList<ArrayList<Generalizer>> generalizer) {
 		this.k = k;
 		this.dataset = new Dataset(dataset, generalizer);
-		
-		numberOfGeneralizers = this.dataset.getNumberOfGeneralizers();
 		
 		// Stores generalizers id
 		this.generalizerIndices = new ArrayList<>();
