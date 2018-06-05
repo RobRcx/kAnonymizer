@@ -1,8 +1,13 @@
 package kAnonymizer;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,7 +24,9 @@ import java.util.List;
  */
 
 public class Main {
-
+	
+	public static String outputFileName = "results.csv";
+	
 	public static void main(String[] args) {
 		if (args.length < 5) {
 			System.out.println("Usage: kAnonymizer <kStart> <kEnd> <kStep> <dataset> <generalizers>");
@@ -97,16 +104,21 @@ public class Main {
 	
 		KAnonymizer kAnonymizer = new KAnonymizer(kStart, dataset, generalizer);
 		
+		/*
+		 * Removes old outputFileName if exists
+		 */
+		new File(outputFileName).delete();
+		
 		System.out.println("\n\n************ Starting k-anonymization! *************");
 		
 		while (kStart >= kEnd) {		
 			kAnonymizer.setK(kStart);
 			System.out.println("**** k-anonymizing with k = " + kStart + " ***\nProcessing...");
-
 			
 			AnonymizationResult result = kAnonymizer.kOptimize();
 			
 			System.out.println(result.prettyPrintableString());
+			appendToFile(result.toString());
 			
 			// System.out.println("sortCounter: " + KAnonymizer.sortCounter);
 			
@@ -159,7 +171,17 @@ public class Main {
 		}
 		return row;
 	}
-
+	
+	public static void appendToFile(String content) {
+		try {
+			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter( outputFileName, true)));
+		    out.println(content);
+		    out.close();
+		} catch (IOException e) {
+			System.out.println("Error writing on " + outputFileName);
+		}
+	}
+	
 	protected static class IntegerWrapper {
 		private Integer value;
 
