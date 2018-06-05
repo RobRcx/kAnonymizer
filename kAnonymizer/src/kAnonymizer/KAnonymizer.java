@@ -115,7 +115,7 @@ public class KAnonymizer {
 		
 		if (debug) {
 			System.out.println("kOptimizeRecursive() :\n    Best cost before computing"
-								+ "the new cost of the node : " + bestCost);
+								+ " the new cost of the node : " + bestCost);
 		}
 		
 		if (nodeAnonymizationCost < bestCost) {
