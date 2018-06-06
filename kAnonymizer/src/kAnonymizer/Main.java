@@ -14,13 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 
- * Aloha, chico.
- * Esto programa, es muy bueno.
  * Mucho tacos, mucho gusto, mucho love.
- * 
- * @author Gino
- *
  */
 
 public class Main {
