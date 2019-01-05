@@ -214,7 +214,7 @@ public class KAnonymizer {
 	 */
 	
 	
-	public static long sortCounter = 0l;
+	//public static long sortCounter = 0l;
 	
 	private ArrayList<AttributeGeneralizerIndicesInfo> prune(ArrayList<AttributeGeneralizerIndicesInfo> headSet, 
 			ArrayList<AttributeGeneralizerIndicesInfo> tailSet, Long bestCost) {
@@ -224,9 +224,9 @@ public class KAnonymizer {
 		//System.out.println("prune()\n    headSet = " + headSet + ", allSet " + allSet);
 		
 		Long lowerBound = computeLowerBound(headSet, allSet);
-		
-		// if (debug) 
-			sortCounter += 2l;
+
+		// if (debug)
+		//	sortCounter += 2l;
 		
 		//System.out.println("    Computed lowerBound : " + lowerBound);
 		if (lowerBound >= bestCost) {
@@ -251,7 +251,7 @@ public class KAnonymizer {
 			newHeadSet.add(tailSet.get(i));
 			
 			AttributeGeneralizerIndicesInfo pairBackup = null;
-			int j = 0;
+			int j;
 			for (j = 0; j < newTailSet.size(); j++) {
 				if (tailSet.get(i).compareTo(newTailSet.get(j)) == 0) {
 					pairBackup = newTailSet.remove(j);
@@ -381,7 +381,7 @@ public class KAnonymizer {
 		}
 	    
 		if (debug) {
-			System.out.println("");
+			System.out.println();
 		}
 		
 		return newTailSet;

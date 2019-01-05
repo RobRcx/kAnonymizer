@@ -14,12 +14,12 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Mucho tacos, mucho gusto, mucho love.
+ * With mucho gusto, and mucho love.
  */
 
 public class Main {
 	
-	public static String outputFileName = "results.csv";
+	public static String outputFileName = "output\\results.csv";
 	
 	public static void main(String[] args) {
 		if (args.length < 5) {
