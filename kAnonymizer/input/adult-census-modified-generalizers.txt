@@ -1,0 +1,8 @@
+Numeric 0 9 10 29 30 39 40 49 50 99
+Numeric 0 199999 200000 1500000
+Numeric 0 9 10 20
+Categoric Female Male
+Numeric 0 49999 50000 99999
+Numeric 0 2999 3000 6000
+Numeric 0 49 50 99
+Categoric <=50K >50K 

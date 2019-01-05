@@ -94,7 +94,7 @@ public class Main {
 		 * Performs the k-anonymization over the values of k as specified by 
 		 * the input interval.
 		 */
-		assert (kStart > kEnd);
+		//assert (kStart > kEnd);
 	
 		KAnonymizer kAnonymizer = new KAnonymizer(kStart, dataset, generalizer);
 		
